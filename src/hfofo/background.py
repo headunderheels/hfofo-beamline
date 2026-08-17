@@ -319,6 +319,7 @@ def track_with_drag(
     n_steps: int | None = None,
     key: jax.Array | None = None,
     aperture_radius: SFloat | None = None,
+    forward_mode: bool = True,
 ):
     """Track a muon through ``field`` (solenoids+RF) with GH2 background drag,
     the ``presswall``, cavity Be windows, and (optionally) the LiH wedge
@@ -387,6 +388,42 @@ def track_with_drag(
     check the returned ``final_state``'s radius against it -- a particle at
     exactly ``aperture_radius`` may be a live particle or a frozen lost one;
     compare against the trajectory's earlier rows if you need to distinguish.
+
+    ``forward_mode``: passed straight through to the internal
+    ``diffrax_solve`` mini-step call, controlling which adjoint diffrax uses
+    for AD -- ``ForwardMode()`` if True (the default), ``RecursiveCheckpointAdjoint()``
+    (diffrax's own default, built via checkpointing) if False. This determines
+    which JAX AD transform works, NOT whether this pipeline is differentiable
+    at all -- an earlier round of this project concluded "jax.grad fails on
+    this pipeline, always use jax.jvp," which was too broad. The precise
+    statement, verified directly both ways on this exact function (bare
+    channel and the full wedges+GH2 driver, matching to 6 significant figures
+    either way): ``forward_mode=True`` pairs with forward-mode AD
+    (``jax.jvp``/``jax.jacfwd``) and BREAKS under ``jax.grad``/``jax.vjp``;
+    ``forward_mode=False`` pairs with reverse-mode AD (``jax.grad``) and
+    should not be used with ``jax.jvp`` (untested, and there is no reason to
+    -- ``ForwardMode`` exists precisely because it is cheaper per-parameter
+    for forward-mode).
+
+    Cost tradeoff: measured on a bare single-particle, no-aperture, no-emittance
+    merit function (one design parameter, one lattice period): forward-mode
+    ~66s, reverse-mode ~119s (reverse-mode ~1.8x slower there -- checkpointing
+    recomputes parts of the forward pass during the backward pass). Measured
+    again on the REAL optimize_lattice.py pipeline (N=6 ensemble, aperture
+    cut, eigen-emittance merit, K=3 parameters): forward-mode ~138s,
+    reverse-mode ~189s -- reverse-mode is STILL slower here (~1.37x), not
+    faster. The naive theoretical argument (forward-mode cost scales linearly
+    with parameter count K; reverse-mode cost is roughly independent of K, so
+    there should be some crossover K beyond which reverse-mode wins) is
+    probably still right in direction, but an earlier version of this
+    docstring asserted a specific crossover ("already around K=2") extrapolated
+    from the simple single-particle numbers above -- that specific claim does
+    NOT hold on the real, more complex pipeline and has been removed. The
+    crossover K for a given merit function is an empirical question, not a
+    generic constant: always run scripts/optimize_lattice.py's
+    ``--verify-consistency`` (which also reports both modes' timing) at
+    whatever K and ensemble size you actually intend to use, rather than
+    assuming a crossover point from a different problem's numbers.
     """
     from beamline.jax.integrate.propagate import diffrax_solve
 
@@ -408,7 +445,9 @@ def track_with_drag(
         else:
             integrate_from = state
         zs = jnp.array([zc0, zc1])
-        track, _ = diffrax_solve(field, integrate_from, zs, forward_mode=True, rtol=rtol, atol=atol)
+        track, _ = diffrax_solve(
+            field, integrate_from, zs, forward_mode=forward_mode, rtol=rtol, atol=atol
+        )
         state = jax.tree.map(lambda a: a[-1], track)
         theta0_sq = 0.0
         if rfc0_centers is not None:
