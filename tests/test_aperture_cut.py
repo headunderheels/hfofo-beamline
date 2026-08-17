@@ -89,17 +89,16 @@ def test_aperture_cut_prevents_solver_crash_on_unstable_particle():
     <75MeV/c cut) that hits diffrax's max_steps safety check without an
     aperture cut must complete successfully with one.
     """
-    import glob
-
     import numpy as np
 
-    candidates = glob.glob(
-        "/home/claude/muon-cooling/**/initial.dat", recursive=True
-    ) + glob.glob("/home/*/muon-cooling/**/initial.dat", recursive=True)
-    if not candidates:
+    from hfofo.reference_data import find_file
+
+    try:
+        path = find_file("initial.dat")
+    except FileNotFoundError:
         pytest.skip("initial.dat not found in this environment")
 
-    d = np.genfromtxt(candidates[0], comments="#")
+    d = np.genfromtxt(path, comments="#")
     mu = d[d[:, 7] == -13]
     pz = mu[:, 5]
     cut = np.abs(pz - 247.5) < 75.0

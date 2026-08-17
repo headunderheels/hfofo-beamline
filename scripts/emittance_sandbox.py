@@ -7,27 +7,34 @@ huge pz tail -- 26.5 to 3781.7 MeV/c -- that would hit apertures/kill-volumes
 in the real G4BL simulation that this simplified channel doesn't model; the
 cut avoids feeding those outliers into a channel with no way to remove them),
 draws a reproducible 24-particle sample, and computes the INPUT eigen-
-emittances (known working, reproduces docs/SESSION_HANDOFF numbers exactly:
-eps1=2929.06, eps2=556.77, product=1,630,806 mm*MeV/c vs naive product
-3,196,377 -- confirms eigen-emittances matter here by a factor of ~2x, not
-just in principle).
+emittances (reproduces docs/SESSION_HANDOFF numbers exactly: eps1=2929.06,
+eps2=556.77, product=1,630,806 mm*MeV/c vs naive product 3,196,377 --
+confirms eigen-emittances matter here by a factor of ~2x, not just in
+principle).
 
-The ensemble-tracking-through-the-channel part is the live blocker this
-script exists to resolve: vmapping N particles through track_with_drag hit
-the sandbox's ~280s tool-timeout during JIT compilation (not runtime) at
-N=24 in the handoff session; N=4 over 1 period compiled+ran in 39.3s. See
-main() for the compile/run timing split and N-bisection this script performs
-to characterize the actual scaling.
+initial.dat lives in the criggall/muon-cooling checkout, not this repo --
+set HFOFO_MUON_COOLING to its path (exact file or a directory to search
+under) if it isn't found automatically; see hfofo.reference_data.find_file.
+
+--track: ensemble-tracks all 24 through 1 period with an aperture cut
+(APERTURE_RADIUS, 200mm -- see track_with_drag's aperture_radius docstring)
+and computes OUTPUT eigen-emittances from the survivors. This was blocked
+for a while by a misdiagnosed "compile cost scales with N" issue -- see
+docs/SESSION_HANDOFF_2026-08-17_aperture_cut.md for the full story; it's
+resolved now (compile time is flat ~15-18s regardless of N).
+
+--bisect: times compile/run separately across N=4/8/16/20/24, if the
+N-scaling question ever needs re-checking.
 
 Usage:
     uv run python scripts/emittance_sandbox.py           # input emittances only
     uv run python scripts/emittance_sandbox.py --track    # + ensemble tracking
+    HFOFO_MUON_COOLING=/path/to/muon-cooling uv run python scripts/emittance_sandbox.py --track
 """
 
 from __future__ import annotations
 
 import argparse
-import glob
 import time
 
 import beamline.jax  # noqa: F401
@@ -42,6 +49,7 @@ from hfofo.background import cavity_window_positions, rfc0_interior_centers, tra
 from hfofo.build import build_channel_batched_windowed, build_wedges_windowed
 from hfofo.emittance import covariance4, eigen_emittances, naive_projected_emittances
 from hfofo.load import load_lattice
+from hfofo.reference_data import find_file
 from hfofo.union_material import build_union_material
 
 DATA = "data/hfofo.yaml"
@@ -74,12 +82,7 @@ def load_sample(size: int = SAMPLE_SIZE, seed: int = SAMPLE_SEED) -> np.ndarray:
     the docstring above / the handoff doc) -- caller picks out the columns
     it needs.
     """
-    candidates = glob.glob(
-        "/home/claude/muon-cooling/**/initial.dat", recursive=True
-    ) + glob.glob("/home/*/muon-cooling/**/initial.dat", recursive=True)
-    if not candidates:
-        raise FileNotFoundError("initial.dat not found under any muon-cooling checkout")
-    d = np.genfromtxt(candidates[0], comments="#")
+    d = np.genfromtxt(find_file("initial.dat"), comments="#")
     mu = d[d[:, 7] == -13]  # PDGid == -13 is mu+
     pz = mu[:, 5]
     cut = np.abs(pz - PZ_CENTER_MEV) < PZ_CUT_MEV

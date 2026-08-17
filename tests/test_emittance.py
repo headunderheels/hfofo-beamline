@@ -15,6 +15,7 @@ import pytest
 pytest.importorskip("beamline")
 
 from hfofo.emittance import covariance4, eigen_emittances, naive_projected_emittances
+from hfofo.reference_data import find_file
 
 
 def test_uncoupled_matches_analytic():
@@ -60,17 +61,12 @@ def test_real_initial_dat_sample_shows_substantial_coupling():
     numerically here, not just in principle. Skips gracefully if
     initial.dat isn't available in this environment.
     """
-    import glob
-
-    candidates = glob.glob(
-        "/home/claude/muon-cooling/**/initial.dat", recursive=True
-    ) + glob.glob(
-        "/home/*/muon-cooling/**/initial.dat", recursive=True
-    )
-    if not candidates:
+    try:
+        path = find_file("initial.dat")
+    except FileNotFoundError:
         pytest.skip("initial.dat not found in this environment")
 
-    d = np.genfromtxt(candidates[0], comments="#")
+    d = np.genfromtxt(path, comments="#")
     mu = d[d[:, 7] == -13]  # PDGid == -13 is mu+
     x, y, px, py, pz = mu[:, 0], mu[:, 1], mu[:, 3], mu[:, 4], mu[:, 5]
     cut = np.abs(pz - 247.5) < 75.0
