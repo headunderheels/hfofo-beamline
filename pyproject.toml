@@ -9,13 +9,14 @@ description = "HFOFO snake muon-cooling channel built on the beamline simulator"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-  "beamline[jax] @ git+https://github.com/headunderheels/beamline.git@f1497b7",
+  "beamline[jax] @ git+https://github.com/headunderheels/beamline.git",
   "pyyaml",
   "hepunits>=2.4.1",
 ]
 
 [project.optional-dependencies]
 plots = ["matplotlib"]
+optim = ["optax"]
 
 [dependency-groups]
 test = ["pytest>=6", "ruff"]
