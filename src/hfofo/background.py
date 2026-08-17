@@ -318,6 +318,7 @@ def track_with_drag(
     atol: float = 1e-7,
     n_steps: int | None = None,
     key: jax.Array | None = None,
+    aperture_radius: SFloat | None = None,
 ):
     """Track a muon through ``field`` (solenoids+RF) with GH2 background drag,
     the ``presswall``, cavity Be windows, and (optionally) the LiH wedge
@@ -346,6 +347,31 @@ def track_with_drag(
     MCS at all (see the module-level note above ``highland_theta0_squared``);
     this is an app-side addition.
 
+    ``aperture_radius``: if given, a particle whose transverse radius
+    (sqrt(x^2+y^2)) exceeds this is treated as LOST -- its state is frozen
+    from that point on (no further field evolution or material kicks; ``x``,
+    ``y``, ``ct``, ``px``, ``py``, ``pz`` all held at their last valid values,
+    ``z`` still advances to track the requested grid). This models the real
+    channel's aperture/collimation (irises at 200-300mm depending on cavity
+    variant, the abtube kill volume at r>500mm, wedge physical extents --
+    none of which this simplified model otherwise represents at all).
+
+    Without this, a genuinely unstable/lost particle (confirmed by direct
+    inspection: transverse radius doubling every ~150-200mm, reaching
+    hundreds of mm within a fraction of one period -- not a numerical
+    artifact) drives the ODE into a regime the default tolerance correctly
+    refuses to resolve (diffrax's max_steps safety check fires, as it
+    should -- see track_full_channel.py's design-doc note on why that check
+    isn't disabled). Loosening tolerance to avoid the crash does NOT fix
+    this: it lets the solver push through into a wildly nonphysical state
+    (verified directly: one such particle, from an entirely unremarkable
+    starting point, ended up 100+ meters off-axis with negative kinetic
+    energy after just one period) that then silently corrupts any ensemble
+    statistic (covariance/emittance) computed from it. Freezing at the
+    aperture is the physically-motivated fix: mirrors what the real
+    channel's collimators do (remove the particle), rather than either
+    crashing on it or quietly averaging in a nonphysical trajectory.
+
     Wedge crossing thickness uses the exact geometric formula
     ``stochastic_solve``'s substep uses (signed-distance at both step
     endpoints plus true displacement), not a containment guess -- both the
@@ -357,19 +383,32 @@ def track_with_drag(
     otherwise it's derived from ``z0``/``z1``/``dz`` directly.
 
     Returns (final_state, (z, x, y, ct, px, py, pz, E)) -- one row per dz step
-    (not including the start point).
+    (not including the start point). If ``aperture_radius`` is given, also
+    check the returned ``final_state``'s radius against it -- a particle at
+    exactly ``aperture_radius`` may be a live particle or a frozen lost one;
+    compare against the trajectory's earlier rows if you need to distinguish.
     """
     from beamline.jax.integrate.propagate import diffrax_solve
 
     if n_steps is None:
         n_steps = int(round(float((z1 - z0) / dz)))
-    step_keys = jr.split(key, n_steps) if key is not None else None
 
-    def one_step(state, i, step_key):
+    def one_step(state, i, step_key, frozen_state, is_lost):
         zc0 = z0 + i * dz
         zc1 = zc0 + dz
+        if aperture_radius is not None:
+            # Feed the FROZEN (already-known-safe) state into diffrax for an
+            # already-lost particle, not its own (potentially wildly
+            # diverging) state -- otherwise re-integrating a runaway
+            # trajectory on every subsequent step reintroduces the same
+            # max_steps risk we're trying to avoid, just later.
+            integrate_from = jax.tree.map(
+                lambda f, s: jnp.where(is_lost, f, s), frozen_state, state
+            )
+        else:
+            integrate_from = state
         zs = jnp.array([zc0, zc1])
-        track, _ = diffrax_solve(field, state, zs, forward_mode=True, rtol=rtol, atol=atol)
+        track, _ = diffrax_solve(field, integrate_from, zs, forward_mode=True, rtol=rtol, atol=atol)
         state = jax.tree.map(lambda a: a[-1], track)
         theta0_sq = 0.0
         if rfc0_centers is not None:
@@ -456,13 +495,56 @@ def track_with_drag(
             state = apply_energy_loss(state, dE_wedge)
         if step_key is not None:
             state = apply_scattering_kick(state, jnp.sqrt(theta0_sq), step_key)
+
+        if aperture_radius is not None:
+            r = jnp.sqrt(state.kin.p.x**2 + state.kin.p.y**2)
+            newly_lost = r > aperture_radius
+            is_lost_next = is_lost | newly_lost
+            # First step a particle exceeds the aperture, its CURRENT state
+            # becomes the frozen reference for every subsequent step;
+            # already-lost particles keep their existing frozen_state.
+            frozen_state_next = jax.tree.map(
+                lambda f, s: jnp.where(is_lost, f, s), frozen_state, state
+            )
+            # Reported state: frozen if lost (before or newly), else the
+            # real evolved state.
+            reported = jax.tree.map(
+                lambda f, s: jnp.where(is_lost_next, f, s), frozen_state_next, state
+            )
+            p, t = reported.kin.p, reported.kin.t
+            return reported, frozen_state_next, is_lost_next, (zc1, p.x, p.y, p.ct, t.x, t.y, t.z, t.ct)
+
         p, t = state.kin.p, state.kin.t
         return state, (zc1, p.x, p.y, p.ct, t.x, t.y, t.z, t.ct)
+
+    if aperture_radius is not None:
+        def scan_body(carry, xi):
+            state, frozen_state, is_lost = carry
+            if key is None:
+                i, step_key = xi, None
+            else:
+                i, step_key = xi
+            new_state, new_frozen, new_lost, out = one_step(
+                state, i, step_key, frozen_state, is_lost
+            )
+            return (new_state, new_frozen, new_lost), out
+
+        init_carry = (start, start, jnp.array(False))
+        if key is None:
+            (final_state, _, _), outs = jax.lax.scan(
+                scan_body, init_carry, jnp.arange(n_steps)
+            )
+        else:
+            step_keys = jr.split(key, n_steps)
+            (final_state, _, _), outs = jax.lax.scan(
+                scan_body, init_carry, (jnp.arange(n_steps), step_keys)
+            )
+        return final_state, outs
 
     if key is None:
 
         def scan_body(state, i):
-            return one_step(state, i, None)
+            return one_step(state, i, None, None, None)
 
         final_state, outs = jax.lax.scan(scan_body, start, jnp.arange(n_steps))
     else:
@@ -470,7 +552,7 @@ def track_with_drag(
 
         def scan_body(state, xi):
             i, step_key = xi
-            return one_step(state, i, step_key)
+            return one_step(state, i, step_key, None, None)
 
         final_state, outs = jax.lax.scan(
             scan_body, start, (jnp.arange(n_steps), step_keys)

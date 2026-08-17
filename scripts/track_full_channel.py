@@ -11,7 +11,7 @@ NOT the wide/lossy 100-particle ensemble mean in hfofo-frozen/g4bl-output,
 which is not a fair single-particle comparison target (its energy std is
 comparable to its mean). Over the full 31 periods this reproduces the true
 reference particle's energy oscillation and transverse helical envelope
-closely (RMS energy diff ~6 MeV against a ~250 MeV typical scale); see the
+closely (RMS energy diff ~7.9 MeV against a ~250 MeV typical scale); see the
 project history for what's been ruled in/out chasing the residual.
 
 Performance: two speedups were investigated (see design doc S9); one worked,
