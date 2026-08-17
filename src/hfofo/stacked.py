@@ -44,21 +44,31 @@ def _batch_size(stack: EMTensorField) -> int:
 def stack_components[T: EMTensorField](components: list[T]) -> T:
     """Stack a list of same-typed components into one batched PyTree.
 
-    Every component must be the same class with the same PyTree structure. Only
-    the *array* leaves are stacked (leading batch axis of length
-    ``len(components)``); *static* leaves (strings, ints like a cavity's
-    ``mode``/``m``/``n``/``p``) must be identical across components and are kept
-    shared. ``StackedField`` vmaps over the array leaves with the static ones
-    held constant.
+    Every component must be the same class with the same PyTree structure.
+    *Array-like* leaves are stacked (leading batch axis of length
+    ``len(components)``); *static* leaves (true non-numeric config, e.g. a
+    cavity's ``mode`` -- and anything declared ``eqx.field(static=True)``, which
+    is excluded from the pytree entirely and so never reaches this partition)
+    must be identical across components and are kept shared.
+
+    NOTE: uses ``eqx.is_array_like`` (True for jax/np arrays *and* plain Python
+    int/float/bool/complex), not ``eqx.is_array`` (True only for real array
+    types). Physical parameters built from ``hepunits`` scaling (e.g.
+    ``80.46 * u.mm``) are plain Python floats, not jax arrays -- partitioning on
+    ``is_array`` alone silently routed them to "static" and `stack_components`
+    kept only the *first* component's value shared across the whole batch,
+    discarding every other component's actual value. Caught via
+    ``StackedField`` vmaps over the array leaves with the (genuinely) static
+    ones held constant.
     """
     if not components:
         raise ValueError("cannot stack an empty component list")
 
-    # Split each component into (dynamic array leaves, static everything-else).
+    # Split each component into (dynamic array-like leaves, static everything-else).
     dynamics, statics = zip(
-        *(eqx.partition(c, eqx.is_array) for c in components), strict=True
+        *(eqx.partition(c, eqx.is_array_like) for c in components), strict=True
     )
-    # Static parts must match across the batch (same mode/m/n/p/etc.).
+    # Static parts must match across the batch (true non-numeric config only).
     static0 = statics[0]
     stacked_dyn = jax.tree.map(lambda *xs: jnp.stack(xs), *dynamics)
     return eqx.combine(stacked_dyn, static0)
