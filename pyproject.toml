@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hfofo-beamline"
+version = "0.1.0"
+description = "HFOFO snake muon-cooling channel built on the beamline simulator"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "beamline[jax] @ git+https://github.com/headunderheels/beamline.git@f1497b7",
+  "pyyaml",
+  "hepunits>=2.4.1",
+]
+
+[project.optional-dependencies]
+plots = ["matplotlib"]
+
+[dependency-groups]
+test = ["pytest>=6", "ruff"]
+dev = [{ include-group = "test" }, "matplotlib"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hfofo"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: slow tests (e.g. eager-loop oracles); excluded by default"]
+addopts = ["-m", "not slow"]
+
+[tool.ruff.lint]
+extend-select = ["I", "UP", "B", "SIM"]

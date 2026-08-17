@@ -1,0 +1,4438 @@
+meta:
+  source: criggall/muon-cooling hfofo-frozen/g4bl-input (track_v7.in)
+  period: 4200.0
+  n_periods: 31
+  frequency: 0.325
+  wedge_base:
+    height: 350.0
+    length: 700.0
+    upper_width: 0.005
+    material: LITHIUM_HYDRIDE
+  notes: Angles in radians; z absolute in mm. Solenoid current in deck engineering
+    units (4.421*BLS scaling); convert via build.CURRENT_TO_JPHI.
+solenoids:
+- z: 500.0
+  current: 48.54258000000001
+  rotations: []
+  polarity: pos
+- z: 1200.0
+  current: -79.09169000000001
+  rotations: []
+  polarity: neg
+- z: 1900.0
+  current: 86.82844000000001
+  rotations:
+  - axis: X
+    angle: 0.001547160560433828
+  - axis: Z
+    angle: -2.136462089468701
+  polarity: pos
+- z: 2600.0
+  current: -93.37152
+  rotations:
+  - axis: X
+    angle: 0.0021754799522098376
+  - axis: Z
+    angle: -0.41120953108578584
+  polarity: neg
+- z: 3300.0
+  current: 94.6094
+  rotations:
+  - axis: X
+    angle: 0.0015061252618816003
+  - axis: Z
+    angle: 2.1352069264776823
+  polarity: pos
+- z: 4000.0
+  current: -94.6094
+  rotations:
+  - axis: X
+    angle: 0.0014250935211782105
+  - axis: Z
+    angle: -1.7803131275955377
+  polarity: neg
+- z: 4700.0
+  current: 94.6094
+  rotations:
+  - axis: X
+    angle: 0.0016914033341530852
+  - axis: Z
+    angle: 0.4422274667679205
+  polarity: pos
+- z: 5400.0
+  current: -94.6094
+  rotations:
+  - axis: X
+    angle: 0.002918968273477589
+  - axis: Z
+    angle: 2.404723227705496
+  polarity: neg
+- z: 6100.0
+  current: 94.6094
+  rotations:
+  - axis: X
+    angle: 0.0021398314139342268
+  - axis: Z
+    angle: -1.692244100280887
+  polarity: pos
+- z: 6800.0
+  current: -94.482
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 7500.0
+  current: 94.307
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 8200.0
+  current: -94.136
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 8900.0
+  current: 93.969
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 9600.0
+  current: -93.805
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 10300.0
+  current: 93.645
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 11000.0
+  current: -93.488
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 11700.0
+  current: 93.334
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 12400.0
+  current: -93.184
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 13100.0
+  current: 93.037
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 13800.0
+  current: -92.892
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 14500.0
+  current: 92.751
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 15200.0
+  current: -92.612
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 15900.0
+  current: 92.476
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 16600.0
+  current: -92.343
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 17300.0
+  current: 92.213
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 18000.0
+  current: -92.085
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 18700.0
+  current: 91.959
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 19400.0
+  current: -91.836
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 20100.0
+  current: 91.715
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 20800.0
+  current: -91.597
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 21500.0
+  current: 91.481
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 22200.0
+  current: -91.367
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 22900.0
+  current: 91.255
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 23600.0
+  current: -91.145
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 24300.0
+  current: 91.038
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 25000.0
+  current: -90.932
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 25700.0
+  current: 90.828
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 26400.0
+  current: -90.726
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 27100.0
+  current: 90.626
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 27800.0
+  current: -90.528
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 28500.0
+  current: 90.432
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 29200.0
+  current: -90.337
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 29900.0
+  current: 90.244
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 30600.0
+  current: -90.153
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 31300.0
+  current: 90.063
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 32000.0
+  current: -89.975
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 32700.0
+  current: 89.888
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 33400.0
+  current: -89.803
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 34100.0
+  current: 89.719
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 34800.0
+  current: -89.637
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 35500.0
+  current: 89.556
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 36200.0
+  current: -89.476
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 36900.0
+  current: 89.398
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 37600.0
+  current: -89.322
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 38300.0
+  current: 89.246
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 39000.0
+  current: -89.172
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 39700.0
+  current: 89.099
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 40400.0
+  current: -89.027
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 41100.0
+  current: 88.956
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 41800.0
+  current: -88.887
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 42500.0
+  current: 88.818
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 43200.0
+  current: -88.751
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 43900.0
+  current: 88.685
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 44600.0
+  current: -88.62
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 45300.0
+  current: 88.556
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 46000.0
+  current: -88.493
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 46700.0
+  current: 88.431
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 47400.0
+  current: -88.37
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 48100.0
+  current: 88.31
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 48800.0
+  current: -88.251
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 49500.0
+  current: 88.193
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 50200.0
+  current: -88.136
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 50900.0
+  current: 88.079
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 51600.0
+  current: -88.024
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 52300.0
+  current: 87.969
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 53000.0
+  current: -87.916
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 53700.0
+  current: 87.863
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 54400.0
+  current: -87.811
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 55100.0
+  current: 87.759
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 55800.0
+  current: -87.709
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 56500.0
+  current: 87.659
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 57200.0
+  current: -87.61
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 57900.0
+  current: 87.562
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 58600.0
+  current: -87.514
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 59300.0
+  current: 87.468
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 60000.0
+  current: -87.422
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 60700.0
+  current: 87.376
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 61400.0
+  current: -87.331
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 62100.0
+  current: 87.287
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 62800.0
+  current: -87.244
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 63500.0
+  current: 87.201
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 64200.0
+  current: -87.159
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 64900.0
+  current: 87.118
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 65600.0
+  current: -87.077
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 66300.0
+  current: 87.036
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 67000.0
+  current: -86.997
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 67700.0
+  current: 86.958
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 68400.0
+  current: -86.919
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 69100.0
+  current: 86.881
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 69800.0
+  current: -86.843
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 70500.0
+  current: 86.807
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 71200.0
+  current: -86.77
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 71900.0
+  current: 86.734
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 72600.0
+  current: -86.699
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 73300.0
+  current: 86.664
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 74000.0
+  current: -86.63
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 74700.0
+  current: 86.596
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 75400.0
+  current: -86.562
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 76100.0
+  current: 86.53
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 76800.0
+  current: -86.497
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 77500.0
+  current: 86.465
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 78200.0
+  current: -86.434
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 78900.0
+  current: 86.402
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 79600.0
+  current: -86.372
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 80300.0
+  current: 86.342
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 81000.0
+  current: -86.312
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 81700.0
+  current: 86.282
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 82400.0
+  current: -86.253
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 83100.0
+  current: 86.225
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 83800.0
+  current: -86.197
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 84500.0
+  current: 86.169
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 85200.0
+  current: -86.141
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 85900.0
+  current: 86.114
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 86600.0
+  current: -86.088
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 87300.0
+  current: 86.061
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 88000.0
+  current: -86.035
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 88700.0
+  current: 86.01
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 89400.0
+  current: -85.985
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 90100.0
+  current: 85.96
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 90800.0
+  current: -85.935
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 91500.0
+  current: 85.911
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 92200.0
+  current: -85.887
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 92900.0
+  current: 85.863
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 93600.0
+  current: -85.84
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 94300.0
+  current: 85.817
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 95000.0
+  current: -85.794
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 95700.0
+  current: 85.772
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 96400.0
+  current: -85.75
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 97100.0
+  current: 85.728
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 97800.0
+  current: -85.707
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 98500.0
+  current: 85.686
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 99200.0
+  current: -85.665
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 99900.0
+  current: 85.644
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 100600.0
+  current: -85.624
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 101300.0
+  current: 85.604
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 102000.0
+  current: -85.584
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 102700.0
+  current: 85.565
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 103400.0
+  current: -85.545
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 104100.0
+  current: 85.526
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 104800.0
+  current: -85.507
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 105500.0
+  current: 85.489
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 106200.0
+  current: -85.471
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 106900.0
+  current: 85.453
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 107600.0
+  current: -85.435
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 108300.0
+  current: 85.417
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 109000.0
+  current: -85.4
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 109700.0
+  current: 85.383
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 110400.0
+  current: -85.366
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 111100.0
+  current: 85.349
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 111800.0
+  current: -85.333
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 112500.0
+  current: 85.317
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 113200.0
+  current: -85.3
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 113900.0
+  current: 85.285
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 114600.0
+  current: -85.269
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 115300.0
+  current: 85.254
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 116000.0
+  current: -85.238
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 116700.0
+  current: 85.223
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 117400.0
+  current: -85.209
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 118100.0
+  current: 85.194
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 118800.0
+  current: -85.179
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 119500.0
+  current: 85.165
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 120200.0
+  current: -85.151
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 120900.0
+  current: 85.137
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: pos
+- z: 121600.0
+  current: -85.124
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: neg
+- z: 122300.0
+  current: 85.11
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: pos
+- z: 123000.0
+  current: -85.097
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  polarity: neg
+- z: 123700.0
+  current: 85.083
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 2.0943951023931953
+  polarity: pos
+- z: 124400.0
+  current: -85.07
+  rotations:
+  - axis: X
+    angle: -0.0025000000426454033
+  - axis: Z
+    angle: 4.1887902047863905
+  polarity: neg
+- z: 125100.0
+  current: 85.058
+  rotations:
+  - axis: X
+    angle: 0.002421870657884612
+  - axis: Z
+    angle: -2.214323081308901
+  polarity: pos
+- z: 125800.0
+  current: -85.045
+  rotations:
+  - axis: X
+    angle: 0.003034463106708573
+  - axis: Z
+    angle: -0.14808616250276088
+  polarity: neg
+- z: 126500.0
+  current: 84.8832
+  rotations:
+  - axis: X
+    angle: 0.0012529713041447982
+  - axis: Z
+    angle: 1.2806784449490844
+  polarity: pos
+- z: 127200.0
+  current: -84.8832
+  rotations:
+  - axis: X
+    angle: 0.0009319681851754017
+  - axis: Z
+    angle: -2.7839867279428
+  polarity: neg
+- z: 127900.0
+  current: 84.8832
+  rotations:
+  - axis: X
+    angle: 0.0008541432939520922
+  - axis: Z
+    angle: -0.14549908927149943
+  polarity: pos
+- z: 128600.0
+  current: -84.75057000000001
+  rotations:
+  - axis: X
+    angle: 0.0019686519441246765
+  - axis: Z
+    angle: 2.55147763083643
+  polarity: neg
+- z: 129300.0
+  current: 78.73801
+  rotations:
+  - axis: X
+    angle: 0.001325250272715255
+  - axis: Z
+    angle: -2.493806474006601
+  polarity: pos
+- z: 130000.0
+  current: -70.86863000000001
+  rotations: []
+  polarity: neg
+- z: 130700.0
+  current: 44.475260000000006
+  rotations: []
+  polarity: pos
+cavities:
+- z: -425.0
+  variant: RFC0
+  time_offset: 1.0250046841357063
+  rotations: []
+- z: -175.0
+  variant: RFC0
+  time_offset: 1.9311630341357062
+  rotations: []
+- z: 75.0
+  variant: RFC0
+  time_offset: 2.8373214041357064
+  rotations: []
+- z: 325.0
+  variant: RFC0
+  time_offset: 3.7434797041357064
+  rotations: []
+- z: 575.0
+  variant: RFC0
+  time_offset: 4.649638104135706
+  rotations: []
+- z: 1075.0
+  variant: RFC
+  time_offset: 6.421424004135707
+  rotations: []
+- z: 1325.0
+  variant: RFC
+  time_offset: 7.330649904135707
+  rotations: []
+- z: 1775.0
+  variant: RFC
+  time_offset: 8.968237204135706
+  rotations: []
+- z: 2025.0
+  variant: RFC
+  time_offset: 9.878553204135706
+  rotations: []
+- z: 2475.0
+  variant: RFC
+  time_offset: 11.518104504135707
+  rotations: []
+- z: 2725.0
+  variant: RFC
+  time_offset: 12.429512104135705
+  rotations: []
+- z: 3175.0
+  variant: RFC
+  time_offset: 14.071031104135706
+  rotations: []
+- z: 3425.0
+  variant: RFC
+  time_offset: 14.983533104135706
+  rotations: []
+- z: 3875.0
+  variant: RFC
+  time_offset: 16.62702210413571
+  rotations: []
+- z: 4125.0
+  variant: RFC
+  time_offset: 17.540620104135705
+  rotations: []
+- z: 4575.0
+  variant: RFC
+  time_offset: 19.186083104135705
+  rotations: []
+- z: 4825.0
+  variant: RFC
+  time_offset: 20.100779104135707
+  rotations: []
+- z: 5275.0
+  variant: RFC
+  time_offset: 21.748220104135704
+  rotations: []
+- z: 5525.0
+  variant: RFC
+  time_offset: 22.664016104135705
+  rotations: []
+- z: 5975.0
+  variant: RFC
+  time_offset: 24.313439104135707
+  rotations: []
+- z: 6225.0
+  variant: RFC
+  time_offset: 25.230336104135706
+  rotations: []
+- z: 6675.0
+  variant: RFC
+  time_offset: 26.95910110413571
+  rotations: []
+- z: 6925.0
+  variant: RFC
+  time_offset: 27.876951104135706
+  rotations: []
+- z: 7375.0
+  variant: RFC
+  time_offset: 29.52934610413571
+  rotations: []
+- z: 7625.0
+  variant: RFC
+  time_offset: 30.44748910413571
+  rotations: []
+- z: 8075.0
+  variant: RFC
+  time_offset: 32.10040910413571
+  rotations: []
+- z: 8325.0
+  variant: RFC
+  time_offset: 33.01884210413571
+  rotations: []
+- z: 8775.0
+  variant: RFC
+  time_offset: 34.6722801041357
+  rotations: []
+- z: 9025.0
+  variant: RFC
+  time_offset: 35.5910001041357
+  rotations: []
+- z: 9475.0
+  variant: RFC
+  time_offset: 37.2449511041357
+  rotations: []
+- z: 9725.0
+  variant: RFC
+  time_offset: 38.16395310413571
+  rotations: []
+- z: 10175.0
+  variant: RFC
+  time_offset: 39.8184101041357
+  rotations: []
+- z: 10425.0
+  variant: RFC
+  time_offset: 40.737692104135704
+  rotations: []
+- z: 10875.0
+  variant: RFC
+  time_offset: 42.392650104135704
+  rotations: []
+- z: 11125.0
+  variant: RFC
+  time_offset: 43.312209104135704
+  rotations: []
+- z: 11575.0
+  variant: RFC
+  time_offset: 44.96766110413571
+  rotations: []
+- z: 11825.0
+  variant: RFC
+  time_offset: 45.88749310413571
+  rotations: []
+- z: 12275.0
+  variant: RFC
+  time_offset: 47.5434351041357
+  rotations: []
+- z: 12525.0
+  variant: RFC
+  time_offset: 48.4635371041357
+  rotations: []
+- z: 12975.0
+  variant: RFC
+  time_offset: 50.1199621041357
+  rotations: []
+- z: 13225.0
+  variant: RFC
+  time_offset: 51.0403311041357
+  rotations: []
+- z: 13675.0
+  variant: RFC
+  time_offset: 52.6972341041357
+  rotations: []
+- z: 13925.0
+  variant: RFC
+  time_offset: 53.617867104135705
+  rotations: []
+- z: 14375.0
+  variant: RFC
+  time_offset: 55.27524210413571
+  rotations: []
+- z: 14625.0
+  variant: RFC
+  time_offset: 56.196135104135706
+  rotations: []
+- z: 15075.0
+  variant: RFC
+  time_offset: 57.8539771041357
+  rotations: []
+- z: 15325.0
+  variant: RFC
+  time_offset: 58.77512910413571
+  rotations: []
+- z: 15775.0
+  variant: RFC
+  time_offset: 60.433432104135704
+  rotations: []
+- z: 16025.0
+  variant: RFC
+  time_offset: 61.3548381041357
+  rotations: []
+- z: 16475.0
+  variant: RFC
+  time_offset: 63.0135981041357
+  rotations: []
+- z: 16725.0
+  variant: RFC
+  time_offset: 63.9352561041357
+  rotations: []
+- z: 17175.0
+  variant: RFC
+  time_offset: 65.5944661041357
+  rotations: []
+- z: 17425.0
+  variant: RFC
+  time_offset: 66.5163741041357
+  rotations: []
+- z: 17875.0
+  variant: RFC
+  time_offset: 68.17602910413571
+  rotations: []
+- z: 18125.0
+  variant: RFC
+  time_offset: 69.09818310413571
+  rotations: []
+- z: 18575.0
+  variant: RFC
+  time_offset: 70.75827910413571
+  rotations: []
+- z: 18825.0
+  variant: RFC
+  time_offset: 71.68067610413571
+  rotations: []
+- z: 19275.0
+  variant: RFC
+  time_offset: 73.3412071041357
+  rotations: []
+- z: 19525.0
+  variant: RFC
+  time_offset: 74.26384510413571
+  rotations: []
+- z: 19975.0
+  variant: RFC
+  time_offset: 75.92480710413571
+  rotations: []
+- z: 20225.0
+  variant: RFC
+  time_offset: 76.84768210413571
+  rotations: []
+- z: 20675.0
+  variant: RFC
+  time_offset: 78.5090691041357
+  rotations: []
+- z: 20925.0
+  variant: RFC
+  time_offset: 79.43217910413571
+  rotations: []
+- z: 21375.0
+  variant: RFC
+  time_offset: 81.0939871041357
+  rotations: []
+- z: 21625.0
+  variant: RFC
+  time_offset: 82.01732910413571
+  rotations: []
+- z: 22075.0
+  variant: RFC
+  time_offset: 83.6795531041357
+  rotations: []
+- z: 22325.0
+  variant: RFC
+  time_offset: 84.60312510413571
+  rotations: []
+- z: 22775.0
+  variant: RFC
+  time_offset: 86.26576010413571
+  rotations: []
+- z: 23025.0
+  variant: RFC
+  time_offset: 87.18955910413571
+  rotations: []
+- z: 23475.0
+  variant: RFC
+  time_offset: 88.8525991041357
+  rotations: []
+- z: 23725.0
+  variant: RFC
+  time_offset: 89.77662310413571
+  rotations: []
+- z: 24175.0
+  variant: RFC
+  time_offset: 91.44006510413571
+  rotations: []
+- z: 24425.0
+  variant: RFC
+  time_offset: 92.36431010413571
+  rotations: []
+- z: 24875.0
+  variant: RFC
+  time_offset: 94.02814910413571
+  rotations: []
+- z: 25125.0
+  variant: RFC
+  time_offset: 94.95261310413571
+  rotations: []
+- z: 25575.0
+  variant: RFC
+  time_offset: 96.6168451041357
+  rotations: []
+- z: 25825.0
+  variant: RFC
+  time_offset: 97.54152610413571
+  rotations: []
+- z: 26275.0
+  variant: RFC
+  time_offset: 99.20614510413571
+  rotations: []
+- z: 26525.0
+  variant: RFC
+  time_offset: 100.13104110413572
+  rotations: []
+- z: 26975.0
+  variant: RFC
+  time_offset: 101.7960431041357
+  rotations: []
+- z: 27225.0
+  variant: RFC
+  time_offset: 102.72115310413571
+  rotations: []
+- z: 27675.0
+  variant: RFC
+  time_offset: 104.38653310413571
+  rotations: []
+- z: 27925.0
+  variant: RFC
+  time_offset: 105.31185310413571
+  rotations: []
+- z: 28375.0
+  variant: RFC
+  time_offset: 106.97760310413571
+  rotations: []
+- z: 28625.0
+  variant: RFC
+  time_offset: 107.9031331041357
+  rotations: []
+- z: 29075.0
+  variant: RFC
+  time_offset: 109.56925310413571
+  rotations: []
+- z: 29325.0
+  variant: RFC
+  time_offset: 110.49498310413571
+  rotations: []
+- z: 29775.0
+  variant: RFC
+  time_offset: 112.16147310413571
+  rotations: []
+- z: 30025.0
+  variant: RFC
+  time_offset: 113.08740310413572
+  rotations: []
+- z: 30475.0
+  variant: RFC
+  time_offset: 114.75426310413572
+  rotations: []
+- z: 30725.0
+  variant: RFC
+  time_offset: 115.68039310413572
+  rotations: []
+- z: 31175.0
+  variant: RFC
+  time_offset: 117.34760310413571
+  rotations: []
+- z: 31425.0
+  variant: RFC
+  time_offset: 118.27393310413571
+  rotations: []
+- z: 31875.0
+  variant: RFC
+  time_offset: 119.94149310413572
+  rotations: []
+- z: 32125.0
+  variant: RFC
+  time_offset: 120.86802310413572
+  rotations: []
+- z: 32575.0
+  variant: RFC
+  time_offset: 122.53593310413571
+  rotations: []
+- z: 32825.0
+  variant: RFC
+  time_offset: 123.46265310413571
+  rotations: []
+- z: 33275.0
+  variant: RFC
+  time_offset: 125.13091310413571
+  rotations: []
+- z: 33525.0
+  variant: RFC
+  time_offset: 126.05781310413572
+  rotations: []
+- z: 33975.0
+  variant: RFC
+  time_offset: 127.7264231041357
+  rotations: []
+- z: 34225.0
+  variant: RFC
+  time_offset: 128.6535131041357
+  rotations: []
+- z: 34675.0
+  variant: RFC
+  time_offset: 130.3224531041357
+  rotations: []
+- z: 34925.0
+  variant: RFC
+  time_offset: 131.2497331041357
+  rotations: []
+- z: 35375.0
+  variant: RFC
+  time_offset: 132.9190131041357
+  rotations: []
+- z: 35625.0
+  variant: RFC
+  time_offset: 133.8464731041357
+  rotations: []
+- z: 36075.0
+  variant: RFC
+  time_offset: 135.5160831041357
+  rotations: []
+- z: 36325.0
+  variant: RFC
+  time_offset: 136.4437331041357
+  rotations: []
+- z: 36775.0
+  variant: RFC
+  time_offset: 138.1136631041357
+  rotations: []
+- z: 37025.0
+  variant: RFC
+  time_offset: 139.0414931041357
+  rotations: []
+- z: 37475.0
+  variant: RFC
+  time_offset: 140.7117431041357
+  rotations: []
+- z: 37725.0
+  variant: RFC
+  time_offset: 141.6397431041357
+  rotations: []
+- z: 38175.0
+  variant: RFC
+  time_offset: 143.3103231041357
+  rotations: []
+- z: 38425.0
+  variant: RFC
+  time_offset: 144.2385031041357
+  rotations: []
+- z: 38875.0
+  variant: RFC
+  time_offset: 145.90938310413569
+  rotations: []
+- z: 39125.0
+  variant: RFC
+  time_offset: 146.8377431041357
+  rotations: []
+- z: 39575.0
+  variant: RFC
+  time_offset: 148.5089431041357
+  rotations: []
+- z: 39825.0
+  variant: RFC
+  time_offset: 149.4374731041357
+  rotations: []
+- z: 40275.0
+  variant: RFC
+  time_offset: 151.10897310413569
+  rotations: []
+- z: 40525.0
+  variant: RFC
+  time_offset: 152.0376731041357
+  rotations: []
+- z: 40975.0
+  variant: RFC
+  time_offset: 153.7094831041357
+  rotations: []
+- z: 41225.0
+  variant: RFC
+  time_offset: 154.6383531041357
+  rotations: []
+- z: 41675.0
+  variant: RFC
+  time_offset: 156.3104631041357
+  rotations: []
+- z: 41925.0
+  variant: RFC
+  time_offset: 157.2394931041357
+  rotations: []
+- z: 42375.0
+  variant: RFC1
+  time_offset: 158.9131231041357
+  rotations: []
+- z: 42625.0
+  variant: RFC1
+  time_offset: 159.8423231041357
+  rotations: []
+- z: 43075.0
+  variant: RFC1
+  time_offset: 161.5150231041357
+  rotations: []
+- z: 43325.0
+  variant: RFC1
+  time_offset: 162.4443831041357
+  rotations: []
+- z: 43775.0
+  variant: RFC1
+  time_offset: 164.1173731041357
+  rotations: []
+- z: 44025.0
+  variant: RFC1
+  time_offset: 165.0468931041357
+  rotations: []
+- z: 44475.0
+  variant: RFC1
+  time_offset: 166.7201731041357
+  rotations: []
+- z: 44725.0
+  variant: RFC1
+  time_offset: 167.6498531041357
+  rotations: []
+- z: 45175.0
+  variant: RFC1
+  time_offset: 169.3234131041357
+  rotations: []
+- z: 45425.0
+  variant: RFC1
+  time_offset: 170.2532531041357
+  rotations: []
+- z: 45875.0
+  variant: RFC1
+  time_offset: 171.9270931041357
+  rotations: []
+- z: 46125.0
+  variant: RFC1
+  time_offset: 172.8570831041357
+  rotations: []
+- z: 46575.0
+  variant: RFC1
+  time_offset: 174.5312031041357
+  rotations: []
+- z: 46825.0
+  variant: RFC1
+  time_offset: 175.4613431041357
+  rotations: []
+- z: 47275.0
+  variant: RFC1
+  time_offset: 177.13574310413568
+  rotations: []
+- z: 47525.0
+  variant: RFC1
+  time_offset: 178.0660331041357
+  rotations: []
+- z: 47975.0
+  variant: RFC1
+  time_offset: 179.7407031041357
+  rotations: []
+- z: 48225.0
+  variant: RFC1
+  time_offset: 180.6711431041357
+  rotations: []
+- z: 48675.0
+  variant: RFC1
+  time_offset: 182.3460831041357
+  rotations: []
+- z: 48925.0
+  variant: RFC1
+  time_offset: 183.2766731041357
+  rotations: []
+- z: 49375.0
+  variant: RFC1
+  time_offset: 184.9518731041357
+  rotations: []
+- z: 49625.0
+  variant: RFC1
+  time_offset: 185.8826131041357
+  rotations: []
+- z: 50075.0
+  variant: RFC1
+  time_offset: 187.5580731041357
+  rotations: []
+- z: 50325.0
+  variant: RFC1
+  time_offset: 188.4889531041357
+  rotations: []
+- z: 50775.0
+  variant: RFC1
+  time_offset: 190.1646731041357
+  rotations: []
+- z: 51025.0
+  variant: RFC1
+  time_offset: 191.0957031041357
+  rotations: []
+- z: 51475.0
+  variant: RFC1
+  time_offset: 192.7716731041357
+  rotations: []
+- z: 51725.0
+  variant: RFC1
+  time_offset: 193.7028431041357
+  rotations: []
+- z: 52175.0
+  variant: RFC1
+  time_offset: 195.3790731041357
+  rotations: []
+- z: 52425.0
+  variant: RFC1
+  time_offset: 196.3103731041357
+  rotations: []
+- z: 52875.0
+  variant: RFC1
+  time_offset: 197.9868531041357
+  rotations: []
+- z: 53125.0
+  variant: RFC1
+  time_offset: 198.9183031041357
+  rotations: []
+- z: 53575.0
+  variant: RFC1
+  time_offset: 200.5950231041357
+  rotations: []
+- z: 53825.0
+  variant: RFC1
+  time_offset: 201.5266031041357
+  rotations: []
+- z: 54275.0
+  variant: RFC1
+  time_offset: 203.2035731041357
+  rotations: []
+- z: 54525.0
+  variant: RFC1
+  time_offset: 204.13529310413568
+  rotations: []
+- z: 54975.0
+  variant: RFC1
+  time_offset: 205.8125031041357
+  rotations: []
+- z: 55225.0
+  variant: RFC1
+  time_offset: 206.74435310413568
+  rotations: []
+- z: 55675.0
+  variant: RFC1
+  time_offset: 208.4218031041357
+  rotations: []
+- z: 55925.0
+  variant: RFC1
+  time_offset: 209.3537831041357
+  rotations: []
+- z: 56375.0
+  variant: RFC1
+  time_offset: 211.0314631041357
+  rotations: []
+- z: 56625.0
+  variant: RFC1
+  time_offset: 211.9635731041357
+  rotations: []
+- z: 57075.0
+  variant: RFC1
+  time_offset: 213.6414931041357
+  rotations: []
+- z: 57325.0
+  variant: RFC1
+  time_offset: 214.5737331041357
+  rotations: []
+- z: 57775.0
+  variant: RFC1
+  time_offset: 216.2518831041357
+  rotations: []
+- z: 58025.0
+  variant: RFC1
+  time_offset: 217.1842531041357
+  rotations: []
+- z: 58475.0
+  variant: RFC1
+  time_offset: 218.8626231041357
+  rotations: []
+- z: 58725.0
+  variant: RFC1
+  time_offset: 219.7951131041357
+  rotations: []
+- z: 59175.0
+  variant: RFC1
+  time_offset: 221.4737131041357
+  rotations: []
+- z: 59425.0
+  variant: RFC1
+  time_offset: 222.40633310413568
+  rotations: []
+- z: 59875.0
+  variant: RFC1
+  time_offset: 224.08515310413568
+  rotations: []
+- z: 60125.0
+  variant: RFC1
+  time_offset: 225.01790310413568
+  rotations: []
+- z: 60575.0
+  variant: RFC1
+  time_offset: 226.6969431041357
+  rotations: []
+- z: 60825.0
+  variant: RFC1
+  time_offset: 227.6298031041357
+  rotations: []
+- z: 61275.0
+  variant: RFC1
+  time_offset: 229.3090631041357
+  rotations: []
+- z: 61525.0
+  variant: RFC1
+  time_offset: 230.2420431041357
+  rotations: []
+- z: 61975.0
+  variant: RFC1
+  time_offset: 231.9215231041357
+  rotations: []
+- z: 62225.0
+  variant: RFC1
+  time_offset: 232.8546231041357
+  rotations: []
+- z: 62675.0
+  variant: RFC1
+  time_offset: 234.5343031041357
+  rotations: []
+- z: 62925.0
+  variant: RFC1
+  time_offset: 235.4675231041357
+  rotations: []
+- z: 63375.0
+  variant: RFC1
+  time_offset: 237.1474231041357
+  rotations: []
+- z: 63625.0
+  variant: RFC1
+  time_offset: 238.0807531041357
+  rotations: []
+- z: 64075.0
+  variant: RFC1
+  time_offset: 239.7608631041357
+  rotations: []
+- z: 64325.0
+  variant: RFC1
+  time_offset: 240.6943131041357
+  rotations: []
+- z: 64775.0
+  variant: RFC1
+  time_offset: 242.3746131041357
+  rotations: []
+- z: 65025.0
+  variant: RFC1
+  time_offset: 243.3081831041357
+  rotations: []
+- z: 65475.0
+  variant: RFC1
+  time_offset: 244.9886931041357
+  rotations: []
+- z: 65725.0
+  variant: RFC1
+  time_offset: 245.92236310413568
+  rotations: []
+- z: 66175.0
+  variant: RFC1
+  time_offset: 247.6030731041357
+  rotations: []
+- z: 66425.0
+  variant: RFC1
+  time_offset: 248.5368631041357
+  rotations: []
+- z: 66875.0
+  variant: RFC1
+  time_offset: 250.2177731041357
+  rotations: []
+- z: 67125.0
+  variant: RFC1
+  time_offset: 251.1516631041357
+  rotations: []
+- z: 67575.0
+  variant: RFC1
+  time_offset: 252.8327731041357
+  rotations: []
+- z: 67825.0
+  variant: RFC1
+  time_offset: 253.7667731041357
+  rotations: []
+- z: 68275.0
+  variant: RFC1
+  time_offset: 255.4480731041357
+  rotations: []
+- z: 68525.0
+  variant: RFC1
+  time_offset: 256.3821831041357
+  rotations: []
+- z: 68975.0
+  variant: RFC1
+  time_offset: 258.0636731041357
+  rotations: []
+- z: 69225.0
+  variant: RFC1
+  time_offset: 258.9978831041357
+  rotations: []
+- z: 69675.0
+  variant: RFC1
+  time_offset: 260.67956310413575
+  rotations: []
+- z: 69925.0
+  variant: RFC1
+  time_offset: 261.6138831041357
+  rotations: []
+- z: 70375.0
+  variant: RFC1
+  time_offset: 263.2957531041357
+  rotations: []
+- z: 70625.0
+  variant: RFC1
+  time_offset: 264.2301731041357
+  rotations: []
+- z: 71075.0
+  variant: RFC1
+  time_offset: 265.9122231041357
+  rotations: []
+- z: 71325.0
+  variant: RFC1
+  time_offset: 266.8467431041357
+  rotations: []
+- z: 71775.0
+  variant: RFC1
+  time_offset: 268.5289831041357
+  rotations: []
+- z: 72025.0
+  variant: RFC1
+  time_offset: 269.4636031041357
+  rotations: []
+- z: 72475.0
+  variant: RFC1
+  time_offset: 271.14602310413574
+  rotations: []
+- z: 72725.0
+  variant: RFC1
+  time_offset: 272.0807431041357
+  rotations: []
+- z: 73175.0
+  variant: RFC1
+  time_offset: 273.7633331041357
+  rotations: []
+- z: 73425.0
+  variant: RFC1
+  time_offset: 274.6981531041357
+  rotations: []
+- z: 73875.0
+  variant: RFC1
+  time_offset: 276.3809231041357
+  rotations: []
+- z: 74125.0
+  variant: RFC1
+  time_offset: 277.31584310413575
+  rotations: []
+- z: 74575.0
+  variant: RFC1
+  time_offset: 278.9987931041357
+  rotations: []
+- z: 74825.0
+  variant: RFC1
+  time_offset: 279.93380310413573
+  rotations: []
+- z: 75275.0
+  variant: RFC1
+  time_offset: 281.6169231041357
+  rotations: []
+- z: 75525.0
+  variant: RFC1
+  time_offset: 282.5520331041357
+  rotations: []
+- z: 75975.0
+  variant: RFC1
+  time_offset: 284.23531310413574
+  rotations: []
+- z: 76225.0
+  variant: RFC1
+  time_offset: 285.1705231041357
+  rotations: []
+- z: 76675.0
+  variant: RFC1
+  time_offset: 286.8539731041357
+  rotations: []
+- z: 76925.0
+  variant: RFC1
+  time_offset: 287.7892731041357
+  rotations: []
+- z: 77375.0
+  variant: RFC1
+  time_offset: 289.4728931041357
+  rotations: []
+- z: 77625.0
+  variant: RFC1
+  time_offset: 290.4082831041357
+  rotations: []
+- z: 78075.0
+  variant: RFC1
+  time_offset: 292.0920631041357
+  rotations: []
+- z: 78325.0
+  variant: RFC1
+  time_offset: 293.0275431041357
+  rotations: []
+- z: 78775.0
+  variant: RFC1
+  time_offset: 294.71149310413574
+  rotations: []
+- z: 79025.0
+  variant: RFC1
+  time_offset: 295.6470631041357
+  rotations: []
+- z: 79475.0
+  variant: RFC1
+  time_offset: 297.3311631041357
+  rotations: []
+- z: 79725.0
+  variant: RFC1
+  time_offset: 298.2668231041357
+  rotations: []
+- z: 80175.0
+  variant: RFC1
+  time_offset: 299.95109310413574
+  rotations: []
+- z: 80425.0
+  variant: RFC1
+  time_offset: 300.88683310413575
+  rotations: []
+- z: 80875.0
+  variant: RFC1
+  time_offset: 302.57125310413574
+  rotations: []
+- z: 81125.0
+  variant: RFC1
+  time_offset: 303.5070931041357
+  rotations: []
+- z: 81575.0
+  variant: RFC1
+  time_offset: 305.1916631041357
+  rotations: []
+- z: 81825.0
+  variant: RFC1
+  time_offset: 306.12758310413574
+  rotations: []
+- z: 82275.0
+  variant: RFC1
+  time_offset: 307.81231310413574
+  rotations: []
+- z: 82525.0
+  variant: RFC1
+  time_offset: 308.7483131041357
+  rotations: []
+- z: 82975.0
+  variant: RFC1
+  time_offset: 310.4332031041357
+  rotations: []
+- z: 83225.0
+  variant: RFC1
+  time_offset: 311.3692831041357
+  rotations: []
+- z: 83675.0
+  variant: RFC1
+  time_offset: 313.0543131041357
+  rotations: []
+- z: 83925.0
+  variant: RFC1
+  time_offset: 313.9904831041357
+  rotations: []
+- z: 84375.0
+  variant: RFC2
+  time_offset: 315.67752310413573
+  rotations: []
+- z: 84625.0
+  variant: RFC2
+  time_offset: 316.6137731041357
+  rotations: []
+- z: 85075.0
+  variant: RFC2
+  time_offset: 318.2991031041357
+  rotations: []
+- z: 85325.0
+  variant: RFC2
+  time_offset: 319.2354331041357
+  rotations: []
+- z: 85775.0
+  variant: RFC2
+  time_offset: 320.92090310413573
+  rotations: []
+- z: 86025.0
+  variant: RFC2
+  time_offset: 321.8573131041357
+  rotations: []
+- z: 86475.0
+  variant: RFC2
+  time_offset: 323.54292310413575
+  rotations: []
+- z: 86725.0
+  variant: RFC2
+  time_offset: 324.47941310413574
+  rotations: []
+- z: 87175.0
+  variant: RFC2
+  time_offset: 326.1651731041357
+  rotations: []
+- z: 87425.0
+  variant: RFC2
+  time_offset: 327.10173310413575
+  rotations: []
+- z: 87875.0
+  variant: RFC2
+  time_offset: 328.78763310413575
+  rotations: []
+- z: 88125.0
+  variant: RFC2
+  time_offset: 329.7242731041357
+  rotations: []
+- z: 88575.0
+  variant: RFC2
+  time_offset: 331.4103031041357
+  rotations: []
+- z: 88825.0
+  variant: RFC2
+  time_offset: 332.3470231041357
+  rotations: []
+- z: 89275.0
+  variant: RFC2
+  time_offset: 334.0331931041357
+  rotations: []
+- z: 89525.0
+  variant: RFC2
+  time_offset: 334.9699931041357
+  rotations: []
+- z: 89975.0
+  variant: RFC2
+  time_offset: 336.6562931041357
+  rotations: []
+- z: 90225.0
+  variant: RFC2
+  time_offset: 337.5931631041357
+  rotations: []
+- z: 90675.0
+  variant: RFC2
+  time_offset: 339.2795931041357
+  rotations: []
+- z: 90925.0
+  variant: RFC2
+  time_offset: 340.2165431041357
+  rotations: []
+- z: 91375.0
+  variant: RFC2
+  time_offset: 341.9031031041357
+  rotations: []
+- z: 91625.0
+  variant: RFC2
+  time_offset: 342.8401231041357
+  rotations: []
+- z: 92075.0
+  variant: RFC2
+  time_offset: 344.5268231041357
+  rotations: []
+- z: 92325.0
+  variant: RFC2
+  time_offset: 345.46390310413574
+  rotations: []
+- z: 92775.0
+  variant: RFC2
+  time_offset: 347.1507331041357
+  rotations: []
+- z: 93025.0
+  variant: RFC2
+  time_offset: 348.08789310413573
+  rotations: []
+- z: 93475.0
+  variant: RFC2
+  time_offset: 349.7748431041357
+  rotations: []
+- z: 93725.0
+  variant: RFC2
+  time_offset: 350.7120731041357
+  rotations: []
+- z: 94175.0
+  variant: RFC2
+  time_offset: 352.39915310413573
+  rotations: []
+- z: 94425.0
+  variant: RFC2
+  time_offset: 353.3364531041357
+  rotations: []
+- z: 94875.0
+  variant: RFC2
+  time_offset: 355.02365310413575
+  rotations: []
+- z: 95125.0
+  variant: RFC2
+  time_offset: 355.9610131041357
+  rotations: []
+- z: 95575.0
+  variant: RFC2
+  time_offset: 357.64834310413573
+  rotations: []
+- z: 95825.0
+  variant: RFC2
+  time_offset: 358.58577310413574
+  rotations: []
+- z: 96275.0
+  variant: RFC2
+  time_offset: 360.27322310413575
+  rotations: []
+- z: 96525.0
+  variant: RFC2
+  time_offset: 361.21072310413575
+  rotations: []
+- z: 96975.0
+  variant: RFC2
+  time_offset: 362.8982831041357
+  rotations: []
+- z: 97225.0
+  variant: RFC2
+  time_offset: 363.8358531041357
+  rotations: []
+- z: 97675.0
+  variant: RFC2
+  time_offset: 365.5235331041357
+  rotations: []
+- z: 97925.0
+  variant: RFC2
+  time_offset: 366.46117310413575
+  rotations: []
+- z: 98375.0
+  variant: RFC2
+  time_offset: 368.14897310413573
+  rotations: []
+- z: 98625.0
+  variant: RFC2
+  time_offset: 369.0866631041357
+  rotations: []
+- z: 99075.0
+  variant: RFC2
+  time_offset: 370.77458310413573
+  rotations: []
+- z: 99325.0
+  variant: RFC2
+  time_offset: 371.7123431041357
+  rotations: []
+- z: 99775.0
+  variant: RFC2
+  time_offset: 373.4003731041357
+  rotations: []
+- z: 100025.0
+  variant: RFC2
+  time_offset: 374.3381931041357
+  rotations: []
+- z: 100475.0
+  variant: RFC2
+  time_offset: 376.0263431041357
+  rotations: []
+- z: 100725.0
+  variant: RFC2
+  time_offset: 376.9642231041357
+  rotations: []
+- z: 101175.0
+  variant: RFC2
+  time_offset: 378.65248310413574
+  rotations: []
+- z: 101425.0
+  variant: RFC2
+  time_offset: 379.59043310413574
+  rotations: []
+- z: 101875.0
+  variant: RFC2
+  time_offset: 381.27879310413573
+  rotations: []
+- z: 102125.0
+  variant: RFC2
+  time_offset: 382.21680310413575
+  rotations: []
+- z: 102575.0
+  variant: RFC2
+  time_offset: 383.90527310413574
+  rotations: []
+- z: 102825.0
+  variant: RFC2
+  time_offset: 384.8433431041357
+  rotations: []
+- z: 103275.0
+  variant: RFC2
+  time_offset: 386.5319231041357
+  rotations: []
+- z: 103525.0
+  variant: RFC2
+  time_offset: 387.47005310413573
+  rotations: []
+- z: 103975.0
+  variant: RFC2
+  time_offset: 389.15874310413574
+  rotations: []
+- z: 104225.0
+  variant: RFC2
+  time_offset: 390.0969331041357
+  rotations: []
+- z: 104675.0
+  variant: RFC2
+  time_offset: 391.78572310413574
+  rotations: []
+- z: 104925.0
+  variant: RFC2
+  time_offset: 392.7239731041357
+  rotations: []
+- z: 105375.0
+  variant: RFC2
+  time_offset: 394.41286310413574
+  rotations: []
+- z: 105625.0
+  variant: RFC2
+  time_offset: 395.35117310413574
+  rotations: []
+- z: 106075.0
+  variant: RFC2
+  time_offset: 397.04016310413573
+  rotations: []
+- z: 106325.0
+  variant: RFC2
+  time_offset: 397.9785231041357
+  rotations: []
+- z: 106775.0
+  variant: RFC2
+  time_offset: 399.6676231041357
+  rotations: []
+- z: 107025.0
+  variant: RFC2
+  time_offset: 400.6060431041357
+  rotations: []
+- z: 107475.0
+  variant: RFC2
+  time_offset: 402.29524310413575
+  rotations: []
+- z: 107725.0
+  variant: RFC2
+  time_offset: 403.23371310413575
+  rotations: []
+- z: 108175.0
+  variant: RFC2
+  time_offset: 404.92301310413575
+  rotations: []
+- z: 108425.0
+  variant: RFC2
+  time_offset: 405.8615431041357
+  rotations: []
+- z: 108875.0
+  variant: RFC2
+  time_offset: 407.55094310413574
+  rotations: []
+- z: 109125.0
+  variant: RFC2
+  time_offset: 408.48952310413574
+  rotations: []
+- z: 109575.0
+  variant: RFC2
+  time_offset: 410.1790131041357
+  rotations: []
+- z: 109825.0
+  variant: RFC2
+  time_offset: 411.11765310413574
+  rotations: []
+- z: 110275.0
+  variant: RFC2
+  time_offset: 412.80724310413575
+  rotations: []
+- z: 110525.0
+  variant: RFC2
+  time_offset: 413.7459331041357
+  rotations: []
+- z: 110975.0
+  variant: RFC2
+  time_offset: 415.4356131041357
+  rotations: []
+- z: 111225.0
+  variant: RFC2
+  time_offset: 416.3743531041357
+  rotations: []
+- z: 111675.0
+  variant: RFC2
+  time_offset: 418.06413310413575
+  rotations: []
+- z: 111925.0
+  variant: RFC2
+  time_offset: 419.00292310413573
+  rotations: []
+- z: 112375.0
+  variant: RFC2
+  time_offset: 420.6927931041357
+  rotations: []
+- z: 112625.0
+  variant: RFC2
+  time_offset: 421.63163310413574
+  rotations: []
+- z: 113075.0
+  variant: RFC2
+  time_offset: 423.3216031041357
+  rotations: []
+- z: 113325.0
+  variant: RFC2
+  time_offset: 424.2604931041357
+  rotations: []
+- z: 113775.0
+  variant: RFC2
+  time_offset: 425.9505431041357
+  rotations: []
+- z: 114025.0
+  variant: RFC2
+  time_offset: 426.8894831041357
+  rotations: []
+- z: 114475.0
+  variant: RFC2
+  time_offset: 428.5796331041357
+  rotations: []
+- z: 114725.0
+  variant: RFC2
+  time_offset: 429.5186231041357
+  rotations: []
+- z: 115175.0
+  variant: RFC2
+  time_offset: 431.2088531041357
+  rotations: []
+- z: 115425.0
+  variant: RFC2
+  time_offset: 432.14789310413573
+  rotations: []
+- z: 115875.0
+  variant: RFC2
+  time_offset: 433.83820310413574
+  rotations: []
+- z: 116125.0
+  variant: RFC2
+  time_offset: 434.7772931041357
+  rotations: []
+- z: 116575.0
+  variant: RFC2
+  time_offset: 436.46770310413575
+  rotations: []
+- z: 116825.0
+  variant: RFC2
+  time_offset: 437.4068331041357
+  rotations: []
+- z: 117275.0
+  variant: RFC2
+  time_offset: 439.09732310413574
+  rotations: []
+- z: 117525.0
+  variant: RFC2
+  time_offset: 440.0365031041357
+  rotations: []
+- z: 117975.0
+  variant: RFC2
+  time_offset: 441.7270831041357
+  rotations: []
+- z: 118225.0
+  variant: RFC2
+  time_offset: 442.6663131041357
+  rotations: []
+- z: 118675.0
+  variant: RFC2
+  time_offset: 444.35696310413573
+  rotations: []
+- z: 118925.0
+  variant: RFC2
+  time_offset: 445.2962431041357
+  rotations: []
+- z: 119375.0
+  variant: RFC2
+  time_offset: 446.9869731041357
+  rotations: []
+- z: 119625.0
+  variant: RFC2
+  time_offset: 447.92630310413574
+  rotations: []
+- z: 120075.0
+  variant: RFC2
+  time_offset: 449.61711310413574
+  rotations: []
+- z: 120325.0
+  variant: RFC2
+  time_offset: 450.55648310413574
+  rotations: []
+- z: 120775.0
+  variant: RFC2
+  time_offset: 452.24738310413574
+  rotations: []
+- z: 121025.0
+  variant: RFC2
+  time_offset: 453.18679310413575
+  rotations: []
+- z: 121475.0
+  variant: RFC2
+  time_offset: 454.8777731041357
+  rotations: []
+- z: 121725.0
+  variant: RFC2
+  time_offset: 455.81722310413573
+  rotations: []
+- z: 122175.0
+  variant: RFC2
+  time_offset: 457.5082831041357
+  rotations: []
+- z: 122425.0
+  variant: RFC2
+  time_offset: 458.4477731041357
+  rotations: []
+- z: 122875.0
+  variant: RFC2
+  time_offset: 460.1389131041357
+  rotations: []
+- z: 123125.0
+  variant: RFC2
+  time_offset: 461.07845310413575
+  rotations: []
+- z: 123575.0
+  variant: RFC2
+  time_offset: 462.7696631041357
+  rotations: []
+- z: 123825.0
+  variant: RFC2
+  time_offset: 463.70924310413574
+  rotations: []
+- z: 124275.0
+  variant: RFC2
+  time_offset: 465.4005331041357
+  rotations: []
+- z: 124525.0
+  variant: RFC2
+  time_offset: 466.3401531041357
+  rotations: []
+- z: 124975.0
+  variant: RFC2
+  time_offset: 468.03151310413574
+  rotations: []
+- z: 125225.0
+  variant: RFC2
+  time_offset: 468.9711831041357
+  rotations: []
+- z: 125675.0
+  variant: RFC2
+  time_offset: 470.66261310413574
+  rotations: []
+- z: 125925.0
+  variant: RFC2
+  time_offset: 471.60232310413573
+  rotations: []
+- z: 126375.0
+  variant: RFC2
+  time_offset: 473.29453310413567
+  rotations: []
+- z: 126625.0
+  variant: RFC2
+  time_offset: 474.23426310413566
+  rotations: []
+- z: 127075.0
+  variant: RFC2
+  time_offset: 475.9257631041357
+  rotations: []
+- z: 127325.0
+  variant: RFC2
+  time_offset: 476.8654931041357
+  rotations: []
+- z: 127775.0
+  variant: RFC2
+  time_offset: 478.5569931041357
+  rotations: []
+- z: 128025.0
+  variant: RFC2
+  time_offset: 479.4967231041357
+  rotations: []
+- z: 128475.0
+  variant: RFC2
+  time_offset: 481.1882331041357
+  rotations: []
+- z: 128725.0
+  variant: RFC2
+  time_offset: 482.1279531041357
+  rotations: []
+- z: 129175.0
+  variant: RFC2
+  time_offset: 483.8194631041357
+  rotations: []
+- z: 129425.0
+  variant: RFC2
+  time_offset: 484.7591931041357
+  rotations: []
+- z: 129875.0
+  variant: RFC2
+  time_offset: 486.45069310413567
+  rotations: []
+- z: 130125.0
+  variant: RFC2
+  time_offset: 487.39042310413566
+  rotations: []
+- z: 130575.0
+  variant: RFC2
+  time_offset: 489.0819231041357
+  rotations: []
+- z: 130825.0
+  variant: RFC2
+  time_offset: 490.0216531041357
+  rotations: []
+- z: 131275.0
+  variant: RFC2
+  time_offset: 491.7131631041357
+  rotations: []
+- z: 131525.0
+  variant: RFC2
+  time_offset: 492.6528831041357
+  rotations: []
+wedges:
+- z: 6450.0
+  x: -79.11
+  y: -155.4
+  lower_width: 59.326
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 7150.0
+  x: 174.2
+  y: 9.204
+  lower_width: 58.783
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 7850.0
+  x: -95.05
+  y: 146.2
+  lower_width: 58.239
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 8550.0
+  x: -79.11
+  y: -155.4
+  lower_width: 57.694
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 9250.0
+  x: 174.2
+  y: 9.204
+  lower_width: 57.15
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 9950.0
+  x: -95.05
+  y: 146.2
+  lower_width: 56.607
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 10650.0
+  x: -79.11
+  y: -155.4
+  lower_width: 56.066
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 11350.0
+  x: 174.2
+  y: 9.204
+  lower_width: 55.527
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 12050.0
+  x: -95.05
+  y: 146.2
+  lower_width: 54.99
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 12750.0
+  x: -79.11
+  y: -155.4
+  lower_width: 54.457
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 13450.0
+  x: 174.2
+  y: 9.204
+  lower_width: 53.928
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 14150.0
+  x: -95.05
+  y: 146.2
+  lower_width: 53.403
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 14850.0
+  x: -79.11
+  y: -155.4
+  lower_width: 52.882
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 15550.0
+  x: 174.2
+  y: 9.204
+  lower_width: 52.367
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 16250.0
+  x: -95.05
+  y: 146.2
+  lower_width: 51.856
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 16950.0
+  x: -79.11
+  y: -155.4
+  lower_width: 51.351
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 17650.0
+  x: 174.2
+  y: 9.204
+  lower_width: 50.851
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 18350.0
+  x: -95.05
+  y: 146.2
+  lower_width: 50.357
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 19050.0
+  x: -79.11
+  y: -155.4
+  lower_width: 49.87
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 19750.0
+  x: 174.2
+  y: 9.204
+  lower_width: 49.388
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 20450.0
+  x: -95.05
+  y: 146.2
+  lower_width: 48.913
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 21150.0
+  x: -79.11
+  y: -155.4
+  lower_width: 48.444
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 21850.0
+  x: 174.2
+  y: 9.204
+  lower_width: 47.982
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 22550.0
+  x: -95.05
+  y: 146.2
+  lower_width: 47.527
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 23250.0
+  x: -79.11
+  y: -155.4
+  lower_width: 47.078
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 23950.0
+  x: 174.2
+  y: 9.204
+  lower_width: 46.636
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 24650.0
+  x: -95.05
+  y: 146.2
+  lower_width: 46.201
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 25350.0
+  x: -79.11
+  y: -155.4
+  lower_width: 45.773
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 26050.0
+  x: 174.2
+  y: 9.204
+  lower_width: 45.352
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 26750.0
+  x: -95.05
+  y: 146.2
+  lower_width: 44.938
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 27450.0
+  x: -79.11
+  y: -155.4
+  lower_width: 44.53
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 28150.0
+  x: 174.2
+  y: 9.204
+  lower_width: 44.13
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 28850.0
+  x: -95.05
+  y: 146.2
+  lower_width: 43.737
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 29550.0
+  x: -79.11
+  y: -155.4
+  lower_width: 43.35
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 30250.0
+  x: 174.2
+  y: 9.204
+  lower_width: 42.97
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 30950.0
+  x: -95.05
+  y: 146.2
+  lower_width: 42.597
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 31650.0
+  x: -79.11
+  y: -155.4
+  lower_width: 42.231
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 32350.0
+  x: 174.2
+  y: 9.204
+  lower_width: 41.872
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 33050.0
+  x: -95.05
+  y: 146.2
+  lower_width: 41.519
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 33750.0
+  x: -79.11
+  y: -155.4
+  lower_width: 41.173
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 34450.0
+  x: 174.2
+  y: 9.204
+  lower_width: 40.834
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 35150.0
+  x: -95.05
+  y: 146.2
+  lower_width: 40.501
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 35850.0
+  x: -79.11
+  y: -155.4
+  lower_width: 40.175
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 36550.0
+  x: 174.2
+  y: 9.204
+  lower_width: 39.855
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 37250.0
+  x: -95.05
+  y: 146.2
+  lower_width: 39.541
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 37950.0
+  x: -79.11
+  y: -155.4
+  lower_width: 39.233
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 38650.0
+  x: 174.2
+  y: 9.204
+  lower_width: 38.932
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 39350.0
+  x: -95.05
+  y: 146.2
+  lower_width: 38.636
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 40050.0
+  x: -79.11
+  y: -155.4
+  lower_width: 38.347
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 40750.0
+  x: 174.2
+  y: 9.204
+  lower_width: 38.064
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 41450.0
+  x: -95.05
+  y: 146.2
+  lower_width: 37.786
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 42150.0
+  x: -79.11
+  y: -155.4
+  lower_width: 37.514
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 42850.0
+  x: 174.2
+  y: 9.204
+  lower_width: 37.248
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 43550.0
+  x: -95.05
+  y: 146.2
+  lower_width: 36.988
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 44250.0
+  x: -79.11
+  y: -155.4
+  lower_width: 36.733
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 44950.0
+  x: 174.2
+  y: 9.204
+  lower_width: 36.483
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 45650.0
+  x: -95.05
+  y: 146.2
+  lower_width: 36.238
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 46350.0
+  x: -79.11
+  y: -155.4
+  lower_width: 35.999
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 47050.0
+  x: 174.2
+  y: 9.204
+  lower_width: 35.765
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 47750.0
+  x: -95.05
+  y: 146.2
+  lower_width: 35.536
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 48450.0
+  x: -79.11
+  y: -155.4
+  lower_width: 35.312
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 49150.0
+  x: 174.2
+  y: 9.204
+  lower_width: 35.093
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 49850.0
+  x: -95.05
+  y: 146.2
+  lower_width: 34.879
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 50550.0
+  x: -79.11
+  y: -155.4
+  lower_width: 34.67
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 51250.0
+  x: 174.2
+  y: 9.204
+  lower_width: 34.465
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 51950.0
+  x: -95.05
+  y: 146.2
+  lower_width: 34.264
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 52650.0
+  x: -79.11
+  y: -155.4
+  lower_width: 34.068
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 53350.0
+  x: 174.2
+  y: 9.204
+  lower_width: 33.877
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 54050.0
+  x: -95.05
+  y: 146.2
+  lower_width: 33.69
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 54750.0
+  x: -79.11
+  y: -155.4
+  lower_width: 33.507
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 55450.0
+  x: 174.2
+  y: 9.204
+  lower_width: 33.328
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 56150.0
+  x: -95.05
+  y: 146.2
+  lower_width: 33.153
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 56850.0
+  x: -79.11
+  y: -155.4
+  lower_width: 32.982
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 57550.0
+  x: 174.2
+  y: 9.204
+  lower_width: 32.815
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 58250.0
+  x: -95.05
+  y: 146.2
+  lower_width: 32.652
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 58950.0
+  x: -79.11
+  y: -155.4
+  lower_width: 32.493
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 59650.0
+  x: 174.2
+  y: 9.204
+  lower_width: 32.337
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 60350.0
+  x: -95.05
+  y: 146.2
+  lower_width: 32.185
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 61050.0
+  x: -79.11
+  y: -155.4
+  lower_width: 32.036
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 61750.0
+  x: 174.2
+  y: 9.204
+  lower_width: 31.891
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 62450.0
+  x: -95.05
+  y: 146.2
+  lower_width: 31.749
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 63150.0
+  x: -79.11
+  y: -155.4
+  lower_width: 31.611
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 63850.0
+  x: 174.2
+  y: 9.204
+  lower_width: 31.476
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 64550.0
+  x: -95.05
+  y: 146.2
+  lower_width: 31.344
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 65250.0
+  x: -79.11
+  y: -155.4
+  lower_width: 31.215
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 65950.0
+  x: 174.2
+  y: 9.204
+  lower_width: 31.089
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 66650.0
+  x: -95.05
+  y: 146.2
+  lower_width: 30.967
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 67350.0
+  x: -79.11
+  y: -155.4
+  lower_width: 30.847
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 68050.0
+  x: 174.2
+  y: 9.204
+  lower_width: 30.73
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 68750.0
+  x: -95.05
+  y: 146.2
+  lower_width: 30.615
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 69450.0
+  x: -79.11
+  y: -155.4
+  lower_width: 30.504
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 70150.0
+  x: 174.2
+  y: 9.204
+  lower_width: 30.395
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 70850.0
+  x: -95.05
+  y: 146.2
+  lower_width: 30.289
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 71550.0
+  x: -79.11
+  y: -155.4
+  lower_width: 30.185
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 72250.0
+  x: 174.2
+  y: 9.204
+  lower_width: 30.084
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 72950.0
+  x: -95.05
+  y: 146.2
+  lower_width: 29.986
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 73650.0
+  x: -79.11
+  y: -155.4
+  lower_width: 29.889
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 74350.0
+  x: 174.2
+  y: 9.204
+  lower_width: 29.795
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 75050.0
+  x: -95.05
+  y: 146.2
+  lower_width: 29.704
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 75750.0
+  x: -79.11
+  y: -155.4
+  lower_width: 29.614
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 76450.0
+  x: 174.2
+  y: 9.204
+  lower_width: 29.527
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 77150.0
+  x: -95.05
+  y: 146.2
+  lower_width: 29.442
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 77850.0
+  x: -79.11
+  y: -155.4
+  lower_width: 29.359
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 78550.0
+  x: 174.2
+  y: 9.204
+  lower_width: 29.278
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 79250.0
+  x: -95.05
+  y: 146.2
+  lower_width: 29.2
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 79950.0
+  x: -79.11
+  y: -155.4
+  lower_width: 29.123
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 80650.0
+  x: 174.2
+  y: 9.204
+  lower_width: 29.048
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 81350.0
+  x: -95.05
+  y: 146.2
+  lower_width: 28.975
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 82050.0
+  x: -79.11
+  y: -155.4
+  lower_width: 28.903
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 82750.0
+  x: 174.2
+  y: 9.204
+  lower_width: 28.834
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 83450.0
+  x: -95.05
+  y: 146.2
+  lower_width: 28.766
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 84150.0
+  x: -79.11
+  y: -155.4
+  lower_width: 28.7
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 84850.0
+  x: 174.2
+  y: 9.204
+  lower_width: 28.636
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 85550.0
+  x: -95.05
+  y: 146.2
+  lower_width: 28.573
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 86250.0
+  x: -79.11
+  y: -155.4
+  lower_width: 28.512
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 86950.0
+  x: 174.2
+  y: 9.204
+  lower_width: 28.452
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 87650.0
+  x: -95.05
+  y: 146.2
+  lower_width: 28.394
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 88350.0
+  x: -79.11
+  y: -155.4
+  lower_width: 28.338
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 89050.0
+  x: 174.2
+  y: 9.204
+  lower_width: 28.282
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 89750.0
+  x: -95.05
+  y: 146.2
+  lower_width: 28.229
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 90450.0
+  x: -79.11
+  y: -155.4
+  lower_width: 28.176
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 91150.0
+  x: 174.2
+  y: 9.204
+  lower_width: 28.125
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 91850.0
+  x: -95.05
+  y: 146.2
+  lower_width: 28.076
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 92550.0
+  x: -79.11
+  y: -155.4
+  lower_width: 28.027
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 93250.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.98
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 93950.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.934
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 94650.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.89
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 95350.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.846
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 96050.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.804
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 96750.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.763
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 97450.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.723
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 98150.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.683
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 98850.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.645
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 99550.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.608
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 100250.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.572
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 100950.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.537
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 101650.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.503
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 102350.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.47
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 103050.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.437
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 103750.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.406
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 104450.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.375
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 105150.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.346
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 105850.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.317
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 106550.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.288
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 107250.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.261
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 107950.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.234
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 108650.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.209
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 109350.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.183
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 110050.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.159
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 110750.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.135
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 111450.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.112
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 112150.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.089
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 112850.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.068
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 113550.0
+  x: -79.11
+  y: -155.4
+  lower_width: 27.046
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 114250.0
+  x: 174.2
+  y: 9.204
+  lower_width: 27.026
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 114950.0
+  x: -95.05
+  y: 146.2
+  lower_width: 27.006
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 115650.0
+  x: -79.11
+  y: -155.4
+  lower_width: 26.986
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 116350.0
+  x: 174.2
+  y: 9.204
+  lower_width: 26.967
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 117050.0
+  x: -95.05
+  y: 146.2
+  lower_width: 26.949
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 117750.0
+  x: -79.11
+  y: -155.4
+  lower_width: 26.931
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 118450.0
+  x: 174.2
+  y: 9.204
+  lower_width: 26.914
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 119150.0
+  x: -95.05
+  y: 146.2
+  lower_width: 26.897
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 119850.0
+  x: -79.11
+  y: -155.4
+  lower_width: 26.881
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 120550.0
+  x: 174.2
+  y: 9.204
+  lower_width: 26.865
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 121250.0
+  x: -95.05
+  y: 146.2
+  lower_width: 26.849
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
+- z: 121950.0
+  x: -79.11
+  y: -155.4
+  lower_width: 26.834
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: -0.47071529926287065
+- z: 122650.0
+  x: 174.2
+  y: 9.204
+  lower_width: 26.82
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 1.6236798031303248
+- z: 123350.0
+  x: -95.05
+  y: 146.2
+  lower_width: 26.806
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 3.717551306747922
+- z: 124050.0
+  x: -79.11
+  y: -155.4
+  lower_width: 26.792
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 5.811946409141117
+- z: 124750.0
+  x: 174.2
+  y: 9.204
+  lower_width: 26.779
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 7.906341511534313
+- z: 125450.0
+  x: -95.05
+  y: 146.2
+  lower_width: 26.766
+  rotations:
+  - axis: Y
+    angle: 1.5707963267948966
+  - axis: Z
+    angle: 10.000736613927508
