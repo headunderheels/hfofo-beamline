@@ -322,10 +322,45 @@ def track_with_drag(
             dE_win = jnp.sum(jnp.where(crosses_win, dE_each, 0.0))
             state = apply_energy_loss(state, dE_win)
         if wedges is not None:
-            in_wedge = wedges.contains(state.kin.p.to_cartesian3())
-            dE_wedge = jnp.where(
-                in_wedge, wedges.interaction_params(state, dz).mean_energy_loss, 0.0
+            # Wedges are only ~26-60mm thick; naive containment checks against
+            # the outer dz step (15mm default) are ambiguous right at a wedge
+            # boundary -- confirmed empirically (a step-like pattern in the
+            # ours-vs-G4BL energy diff lines up with wedge z positions).
+            # A 2-point (start+end) containment average halved the error but
+            # didn't close it (still assumes the crossing sits at the step's
+            # midpoint). This instead uses the EXACT thickness formula
+            # stochastic_solve's substep uses for its (correct, geometric)
+            # boundary-crossing case -- signed_time_to_boundary at both
+            # endpoints plus the true displacement, not a containment guess:
+            #   both endpoints inside  -> thickness = displacement
+            #   only start inside      -> thickness = -sdf0 (exit distance)
+            #   only end inside        -> thickness = displacement - sdf0
+            #   neither inside         -> thickness = 0
+            # (see stochastic.py's substep -- this is that formula, just
+            # evaluated directly instead of through the broken
+            # always-present-material combination described above.)
+            start_state = jax.tree.map(lambda a: a[0], track)
+            end_state_raw = jax.tree.map(lambda a: a[-1], track)
+            ray0 = start_state.ray()
+            ray1 = end_state_raw.ray()
+            sdf0 = wedges.signed_time_to_boundary(ray0)
+            sdf1 = wedges.signed_time_to_boundary(ray1)
+            displacement = abs(ray1.p - ray0.p)
+            raw_thickness = jnp.where(
+                (sdf0 < 0.0) & (sdf1 < 0.0),
+                displacement,
+                jnp.where(
+                    sdf0 < 0.0,
+                    -sdf0,
+                    jnp.where(sdf1 < 0.0, displacement - sdf0, 0.0),
+                ),
             )
+            # Bethe-Bloch-style straggling formulas can have a log(thickness)
+            # singularity at exactly zero -- substitute a tiny safe value and
+            # gate the result, same pattern stochastic_solve's substep uses.
+            safe_thickness = jnp.where(raw_thickness <= 0.0, 1e-6 * u.mm, raw_thickness)
+            dE_raw = wedges.interaction_params(state, safe_thickness).mean_energy_loss
+            dE_wedge = jnp.where(raw_thickness > 0.0, dE_raw, 0.0)
             state = apply_energy_loss(state, dE_wedge)
         p, t = state.kin.p, state.kin.t
         return state, (zc1, p.x, p.y, p.ct, t.x, t.y, t.z, t.ct)
