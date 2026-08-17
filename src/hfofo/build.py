@@ -281,6 +281,77 @@ def build_channel_batched(
 
 
 # ---------------------------------------------------------------------------
+# Windowed (locality-limited) builders -- performance optimization
+# ---------------------------------------------------------------------------
+# build_channel_batched/build_wedges above vmap over EVERY element (187
+# solenoids, 379 cavities, 171 wedges) at EVERY evaluation point, regardless
+# of location. That's mostly wasted work: a cavity's/wedge's field/material is
+# EXACTLY zero outside its own small physical extent (a 249mm cavity length, a
+# ~30-60mm wedge), so at any given z at most 1-2 of 379 cavities and ~1 of 171
+# wedges can ever be nonzero -- the other 95%+ compute a guaranteed zero every
+# time. Solenoids decay smoothly rather than having a hard cutoff, but fall to
+# a small fraction of peak within about one coil length, so distant ones are
+# negligible too. Measured: at a representative point, only ~4-5% of all
+# elements are within a generous +-3000mm window.
+#
+# These builders select the K nearest elements (by |z - z_center|) instead of
+# all of them, for a caller (e.g. track_full_channel.py, tracking one lattice
+# period at a time) that knows it only needs elements relevant to a local
+# z-window. K is FIXED regardless of z_center -- not a margin/cutoff distance
+# -- so every window produces a same-shaped stack: the compiled tracking
+# function is reused across periods rather than retracing every chunk (which
+# would happen if the element COUNT varied call to call). K defaults were
+# chosen with a safety margin above the measured max count of elements within
+# +-4200mm (one full lattice period) of any chunk in this specific lattice
+# (max observed: 18 solenoids, 35 cavities, 17 wedges) -- if you use a lattice
+# with a different period/element density, or a much wider outer step, verify
+# these still comfortably exceed the true local count (undershooting silently
+# drops real, non-negligible contributions rather than raising an error).
+K_SOLENOIDS_LOCAL = 24
+K_CAVITIES_LOCAL = 44
+K_WEDGES_LOCAL = 22
+
+
+def _nearest(records: list, z_center: float, k: int) -> list:
+    """The k records (Solenoid/Cavity/Wedge) with z closest to z_center."""
+    return sorted(records, key=lambda r: abs(r.z - z_center))[:k]
+
+
+def build_channel_batched_windowed(
+    lattice: Lattice,
+    z_center: float,
+    k_solenoids: int = K_SOLENOIDS_LOCAL,
+    k_cavities: int = K_CAVITIES_LOCAL,
+) -> BatchedChannel:
+    """Like ``build_channel_batched``, but only the ``k_*`` nearest elements
+    to ``z_center`` (see the module note above). Fixed ``k`` keeps the stack
+    shape constant across different ``z_center`` calls, so a tracking loop
+    that rebuilds this once per lattice period reuses one compiled function
+    rather than retracing every period.
+    """
+    groups: list[StackedField] = []
+    if lattice.solenoids:
+        near_sols = _nearest(lattice.solenoids, z_center, k_solenoids)
+        sols = [build_solenoid(s) for s in near_sols]
+        groups.append(StackedField(stack=stack_components(sols)))
+    if lattice.cavities:
+        near_cavs = _nearest(lattice.cavities, z_center, k_cavities)
+        cavs = [build_cavity(c, lattice.meta.frequency) for c in near_cavs]
+        groups.append(StackedField(stack=stack_components(cavs)))
+    if not groups:
+        raise ValueError("windowed channel has no components")
+    return BatchedChannel(groups=groups)
+
+
+def build_wedges_windowed(
+    lattice: Lattice, z_center: float, k_wedges: int = K_WEDGES_LOCAL
+) -> list[TransformMaterialVolume]:
+    """Like ``build_wedges``, but only the ``k_wedges`` nearest to ``z_center``."""
+    near_weds = _nearest(lattice.wedges, z_center, k_wedges)
+    return [build_wedge(w, lattice.meta.wedge_base) for w in near_weds]
+
+
+# ---------------------------------------------------------------------------
 # Verification helper -- check a (Rin, Rout, L, current) config against a
 # known reference Bz(z), with NO fitting (AMP_TO_JPHI is a physical constant).
 # ---------------------------------------------------------------------------

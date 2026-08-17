@@ -14,6 +14,36 @@ reference particle's energy oscillation and transverse helical envelope
 closely (RMS energy diff ~6 MeV against a ~250 MeV typical scale); see the
 project history for what's been ruled in/out chasing the residual.
 
+Performance: two speedups were investigated (see design doc S9); one worked,
+one didn't pan out and was left as a documented limitation rather than
+"fixed" at a safety cost.
+(1) Windowed field/material builders (``build_channel_batched_windowed``/
+    ``build_wedges_windowed``, see build.py's module note) -- rebuilt once per
+    lattice period from only the ~20-45 nearest elements instead of vmapping
+    over all 566 EM elements + 171 wedges regardless of location. Measured
+    ~5-6x faster per period once compiled (cavity/wedge contributions outside
+    the window are exact, not approximate -- their fields are identically
+    zero there; solenoids' negligible-but-nonzero tail introduces a relative
+    error ~5.6e-6, far below other approximations already in this model). Set
+    ``HFOFO_NO_WINDOW=1`` to fall back to the full unwindowed builders.
+(2) A persistent JAX compilation cache was attempted (``jax_compilation_cache_dir``)
+    to avoid the ~20-25s recompile every fresh process pays (e.g. each resumed
+    invocation). It does NOT work for this pipeline: diffrax's default
+    ``throw=True`` runtime check (raising via an ``equinox.error_if`` host
+    callback on max-steps-exceeded/non-finite results) makes the compiled
+    graph uncacheable -- confirmed via ``jax_explain_cache_misses``
+    ("uses host callbacks"). ``beamline.diffrax_solve`` doesn't expose
+    ``throw=False`` to disable it, and that check is exactly what caught a
+    real correctness bug earlier in this project (the beta->0/max_steps
+    degeneracy behind ``apply_energy_loss``'s mass clamp) -- suppressing it
+    to make compilation cacheable would trade away a safety net that has
+    already paid for itself once. Not pursued. The practical equivalent with
+    no such tradeoff: run this script as ONE long-lived process covering many
+    periods rather than many short-lived resumed invocations -- the ordinary
+    in-memory jax.jit cache already reuses the compiled function across
+    periods within a process (confirmed: periods after the first run in ~4s
+    each, only the first pays the compile).
+
 Supports resuming from a partial run (reads the last row of the output CSV
 and reconstructs state) since the full 31-period run needs several
 invocations to complete within typical tool/session time limits.
@@ -40,7 +70,12 @@ import numpy as np
 from beamline.jax.coordinates import Cartesian3, Cartesian4, Tangent
 from beamline.jax.kinematics import MuonStateDz
 from hfofo.background import cavity_window_positions, rfc0_interior_centers, track_with_drag
-from hfofo.build import build_channel_batched, build_wedges
+from hfofo.build import (
+    build_channel_batched,
+    build_channel_batched_windowed,
+    build_wedges,
+    build_wedges_windowed,
+)
 from hfofo.load import load_lattice
 from hfofo.union_material import build_union_material
 
@@ -53,6 +88,7 @@ SEED = int(os.environ.get("HFOFO_SEED", "0"))
 # opt back in (e.g. for emittance-growth studies where MCS itself matters,
 # independent of this residual question).
 USE_MCS = os.environ.get("HFOFO_MCS", "0") == "1"
+USE_WINDOW = os.environ.get("HFOFO_NO_WINDOW", "0") != "1"
 BEAM_START = -700.0 * u.mm
 REF_MOMENTUM = 247.5 * u.MeV
 MUON_MASS = 105.6583715 * u.MeV
@@ -72,8 +108,9 @@ def main() -> None:
 
     lattice = load_lattice(DATA)
     period = lattice.meta.period
-    channel = build_channel_batched(lattice)
-    wedges = build_union_material(build_wedges(lattice))
+    if not USE_WINDOW:
+        channel = build_channel_batched(lattice)
+        wedges = build_union_material(build_wedges(lattice))
     window_z, window_thick = cavity_window_positions(lattice.cavities)
     rfc0_centers = rfc0_interior_centers(lattice.cavities)
 
@@ -112,10 +149,14 @@ def main() -> None:
         )
         z0 = BEAM_START
 
-    run = jax.jit(
-        lambda s, z0, z1, n, key: track_with_drag(
+    # channel/wedges are passed as ordinary (traced) arguments, not closed
+    # over -- so when USE_WINDOW rebuilds them with new *values* each period
+    # but the same *shape* (fixed K), jax reuses the one compiled program
+    # instead of retracing every period.
+    def _run_impl(channel, wedges, state, z0, z1, n, key):
+        return track_with_drag(
             channel,
-            s,
+            state,
             z0,
             z1,
             dz=DZ,
@@ -128,9 +169,9 @@ def main() -> None:
             key=key,
             rtol=1e-3,
             atol=1e-5,
-        ),
-        static_argnums=(3,),
-    )
+        )
+
+    run = jax.jit(_run_impl, static_argnums=(5,))
 
     t0 = time.time()
     i = 0
@@ -138,8 +179,12 @@ def main() -> None:
     while z0 < z_end - 1e-6:
         z1 = min(z0 + CHUNK_PERIODS * period, z_end)
         n = int(round((z1 - z0) / DZ))
+        if USE_WINDOW:
+            z_center = float((z0 + z1) / 2)
+            channel = build_channel_batched_windowed(lattice, z_center=z_center)
+            wedges = build_union_material(build_wedges_windowed(lattice, z_center=z_center))
         chunk_key = jr.fold_in(base_key, i) if USE_MCS else None
-        state, outs = run(state, z0, z1, n, chunk_key)
+        state, outs = run(channel, wedges, state, z0, z1, n, chunk_key)
         jax.block_until_ready(outs[0])
         zc, x, y, ct, px, py, pz, E = (np.asarray(o) for o in outs)
         with open(OUT, "a") as f:
