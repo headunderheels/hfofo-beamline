@@ -93,33 +93,34 @@ def test_cavities_only(lattice: Lattice):
     assert len(channel.components) == 379
 
 
-def test_solenoid_field_calibrated():
-    """Solenoid on-axis Bz matches the G4BL single-solenoid reference profile.
+def test_solenoid_field_formula_and_conversion():
+    """The ThickSolenoid formula + AMP_TO_JPHI conversion match G4BL exactly.
 
-    Reference: criggall/muon-cooling field-studies single-solenoid trace,
-    kat11 geometry at current=80.46, peak Bz=4.69314 T at z=0. We assert the
-    calibrated thin-shell model reproduces the profile to <=2% (it fits to
-    ~1.4%; see build.CURRENT_TO_JPHI note).
+    Reference: criggall/muon-cooling field-studies single-solenoid trace
+    (field-studies/trace/single-solenoid/ReferenceParticle_NoPitch.txt),
+    on-axis Bz(z) at current=80.46 Amp/mm^2. This trace's *own* deck (recovered
+    from the muon-cooling git history at the commit that generated it, since
+    the checked-in deck had since drifted -- see build.py's CALIBRATION note)
+    used a test coil with innerRadius=360, outerRadius=500 -- NOT kat11's real
+    420/600 -- so this validates the general model (uniform-current-density
+    annulus, G4BL's exact nSheets algorithm) and the AMP_TO_JPHI unit
+    conversion, not kat11's specific geometry. No fitting: AMP_TO_JPHI is a
+    physical constant (Amp -> e/ns), and the match is <=0.03% at every point.
     """
     pytest.importorskip("beamline")
     import hepunits as u
-    from beamline.jax.magnet.solenoid import ThinShellSolenoid
 
-    from hfofo.build import (
-        CURRENT_TO_JPHI,
-        SOLENOID_LENGTH,
-        SOLENOID_SHELL_R,
-    )
+    from hfofo.build import predicted_bz_onaxis
 
-    # G4BL reference: on-axis Bz(z) [T] at current=80.46
+    # G4BL reference: on-axis Bz(z) [T] at current=80.46, test-coil geometry
+    # (innerRadius=360, outerRadius=500, length=300 -- see docstring above).
     ref = {0: 4.69314, 100: 4.39501, 200: 3.65254, 300: 2.77530, 395: 2.03980}
-    sol = ThinShellSolenoid(
-        R=SOLENOID_SHELL_R, jphi=80.46 * CURRENT_TO_JPHI, L=SOLENOID_LENGTH
-    )
     for zmm, bref in ref.items():
-        _, bz = sol.B_elliptic(1e-6, zmm * u.mm)
-        got = float(bz) / u.tesla
-        assert abs(got - bref) / bref < 0.02, f"z={zmm}: {got:.4f} vs {bref:.4f}"
+        bz = predicted_bz_onaxis(
+            80.46, zmm * u.mm, Rin=360.0 * u.mm, Rout=500.0 * u.mm
+        )
+        got = bz / u.tesla
+        assert abs(got - bref) / bref < 0.0005, f"z={zmm}: {got:.5f} vs {bref:.5f}"
 
 
 # --- batched channel correctness (the key test: batched == loop oracle) ---

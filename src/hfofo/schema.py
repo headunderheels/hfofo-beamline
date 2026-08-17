@@ -39,7 +39,7 @@ class Solenoid:
 
     ``current`` is retained in the deck's engineering units (the ``4.421*BLS``
     scaling); the current->jphi physics conversion is applied at build time via
-    a single documented factor (see ``build.CURRENT_TO_JPHI``).
+    a single documented factor (see ``build.AMP_TO_JPHI``).
     """
 
     z: float

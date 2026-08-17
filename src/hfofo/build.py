@@ -3,21 +3,17 @@
 Turns the loaded schema records into placed ``beamline`` field sources summed
 into one ``SumField``. Each element is wrapped in a ``TransformEMField`` (for EM
 sources) placing it from local to global coordinates.
-
-The one physics-calibration knob -- the solenoid current -> ``jphi`` conversion
--- is isolated as ``CURRENT_TO_JPHI`` below and is currently a **placeholder**.
-See the module note and ``calibrate_jphi`` before trusting solenoid field
-magnitudes.
 """
 
 from __future__ import annotations
 
+import equinox as eqx
 import hepunits as u
 import jax.numpy as jnp
 
-from beamline.jax.coordinates import Cartesian3, Cartesian4, Transform
+from beamline.jax.coordinates import Cartesian3, Cartesian4, Cylindric3, Tangent, Transform
 from beamline.jax.emfield import EMTensorField, SumField, TransformEMField
-from beamline.jax.magnet.solenoid import ThinShellSolenoid
+from beamline.jax.magnet.solenoid import ThickSolenoid
 from beamline.jax.absorber.material import MATERIALS
 from beamline.jax.absorber.volume import AbsorberWedge, TransformMaterialVolume
 from beamline.jax.rfcavity.pillbox import PillboxCavity
@@ -28,29 +24,64 @@ from hfofo.stacked import BatchedChannel, StackedField, stack_components
 # ---------------------------------------------------------------------------
 # CALIBRATION -- solenoid current -> jphi
 # ---------------------------------------------------------------------------
-# The deck's solenoid ``current`` is in engineering units (the ``4.421*BLS``
-# scaling). Calibrated against the committed G4Beamline single-solenoid
-# reference-particle trace (criggall/muon-cooling
-# field-studies/trace/single-solenoid/ReferenceParticle_NoPitch.txt), which
-# tabulates on-axis Bz(z) for the kat11 geometry at current=80.46: peak
-# Bz = 4.69314 T at z=0.
+# G4Beamline's ``coil`` element is a uniform-current-density annulus (Rin..Rout)
+# discretized into ``nSheets`` radially-spaced thin current sheets, each carrying
+# a fraction of the total current proportional to its radial slice -- see
+# BLCoil.cc's ``getSheetField``/``addField`` (G4beamline 3.08 source). This is
+# EXACTLY ``beamline.jax.magnet.solenoid.ThickSolenoid.B_shells``: verified
+# bit-for-bit against a standalone compile of G4BL's literal C++ code (same
+# elliptic-integral sheet formula, differing only by the expected Amp<->e/ns
+# unit conversion, matched to 9+ significant figures).
 #
-# MODELING CHOICE (provisional -- flagged for later investigation):
-# G4Beamline's ``coil`` field falls off faster in z than beamline's
-# ``ThickSolenoid`` (uniform current across Rin..Rout) predicts -- a ~12%
-# discrepancy at z=300mm. The falloff instead matches a THIN SHELL at the inner
-# radius (420mm) to <=1.4% across the whole profile. This is a radial
-# current-distribution modeling difference between the two codes, not a bug.
-# Since the frozen channel was designed/tuned in G4BL, we match G4BL by using a
-# thin shell at 420mm. Revisit if a thick-coil treatment is wanted (would
-# require reconciling the two current models -- candidate to raise upstream).
-CURRENT_TO_JPHI: float = 8.613692e11  # thin-shell@420 fit to G4BL reference
-_CALIBRATED = True
+# The single-solenoid reference trace originally used to calibrate this
+# (criggall/muon-cooling field-studies/trace/single-solenoid/
+# ReferenceParticle_NoPitch.txt) turned out to use a DIFFERENT, smaller test
+# coil (innerRadius=360, outerRadius=500) than kat11's real geometry
+# (420, 600) -- found by walking the file's git history to the commit that
+# generated it (criggall/muon-cooling commit 9eaba07,
+# field-studies/g4bl-input/hfofo_sol.in). That geometry mismatch, not a
+# modeling difference, was the entire source of the earlier ~1-19% mismatches
+# seen with both a thin-shell heuristic and a naive thick-coil fit. Using
+# ThickSolenoid with the CORRECT test-coil geometry and the exact derived
+# AMP_TO_JPHI conversion (no fitting at all) reproduces that reference trace to
+# <=0.03% at every tabulated point.
+#
+# AMP_TO_JPHI converts G4BL's ``current`` (Amp/mm^2, a real current density) to
+# beamline's ``jphi`` (e/ns/mm^2): 1 Amp = 1 Coulomb/s = (1/e) elementary
+# charges/s = 6.241509074e9 e/ns (e = 1.602176634e-19 C). This is a physical
+# constant, not a fit.
+AMP_TO_JPHI: float = 6.241509074e9  # e/ns per Amp (exact: 1/(e[C] * 1e9))
 
-# Coil kat11 geometry (from track_v7.in): all solenoids share this.
-# We model each as a thin shell at the inner radius (see CALIBRATION note).
-SOLENOID_SHELL_R = 420.0 * u.mm
+# Coil kat11 geometry (from track_v7.in): all solenoids share this. Modeled as
+# a true thick (uniform-current-density) annulus, nSheets=10 pinned to match
+# the deck's ``coil kat11 ... nSheets=10`` exactly (see CALIBRATION note).
+SOLENOID_RIN = 420.0 * u.mm
+SOLENOID_ROUT = 600.0 * u.mm
 SOLENOID_LENGTH = 300.0 * u.mm
+SOLENOID_NSHEETS = 10
+
+
+class Kat11Solenoid(ThickSolenoid):
+    """``ThickSolenoid`` with ``num_shells`` pinned to match kat11's nSheets=10.
+
+    ``ThickSolenoid.field_strength`` calls ``B_shells`` with its default
+    (num_shells=200, vmap=False/lax.scan) -- both wrong for us: 200 shells is
+    20x the work for no accuracy gain here (10 already matches G4BL to
+    <=0.03%), and under the outer ``StackedField`` vmap (187 solenoids at
+    once), an inner ``vmap`` compiles better than a nested ``lax.scan``.
+    """
+
+    num_shells: int = eqx.field(static=True, default=SOLENOID_NSHEETS)
+
+    def field_strength(
+        self, point: Cartesian4
+    ) -> tuple[Tangent[Cartesian3], Tangent[Cartesian3]]:
+        xcyl = point.to_cylindric3()
+        Brho, Bz = self.B_shells(xcyl.rho, xcyl.z, num_shells=self.num_shells, vmap=True)
+        Bphi = jnp.zeros_like(Brho)
+        E = Tangent(p=point.to_cartesian3(), t=Cartesian3.make())
+        B = Tangent(p=xcyl, t=Cylindric3.make(rho=Brho, phi=Bphi, z=Bz))
+        return E, B.to_cartesian()
 
 # Pillbox variants: (iris radius, gradient). Iris radius is a kill aperture in
 # the deck, not a field shaper; for optics we use a single TM010 pillbox and
@@ -108,9 +139,10 @@ def _placement_transform(
 
 
 def build_solenoid(s: Solenoid) -> EMTensorField:
-    jphi = s.current * CURRENT_TO_JPHI
-    coil = ThinShellSolenoid(
-        R=SOLENOID_SHELL_R,
+    jphi = s.current * AMP_TO_JPHI
+    coil = Kat11Solenoid(
+        Rin=SOLENOID_RIN,
+        Rout=SOLENOID_ROUT,
         jphi=jphi,
         L=SOLENOID_LENGTH,
     )
@@ -210,16 +242,6 @@ def build_channel(
     ~minutes eager, OOM under jit). It is kept as a correctness oracle and for
     small assemblies. Use ``build_channel_batched`` for the full channel.
     """
-    if not _CALIBRATED and include_solenoids:
-        import warnings
-
-        warnings.warn(
-            "Solenoid current->jphi conversion is not calibrated "
-            "(CURRENT_TO_JPHI is a placeholder); solenoid field magnitudes are "
-            "not physical. See build.calibrate_jphi.",
-            stacklevel=2,
-        )
-
     components: list[EMTensorField] = []
     if include_solenoids:
         components.extend(build_solenoid(s) for s in lattice.solenoids)
@@ -246,16 +268,6 @@ def build_channel_batched(
     single ``PillboxCavity`` shape, differing only in ``E0``, so all cavities
     can batch together once ``E0`` is a stacked leaf).
     """
-    if not _CALIBRATED and include_solenoids:
-        import warnings
-
-        warnings.warn(
-            "Solenoid current->jphi conversion is not calibrated "
-            "(CURRENT_TO_JPHI is a placeholder); solenoid field magnitudes are "
-            "not physical. See build.calibrate_jphi.",
-            stacklevel=2,
-        )
-
     groups: list[StackedField] = []
     if include_solenoids and lattice.solenoids:
         sols = [build_solenoid(s) for s in lattice.solenoids]
@@ -269,19 +281,23 @@ def build_channel_batched(
 
 
 # ---------------------------------------------------------------------------
-# Calibration helper (to be used once a reference field is known)
+# Verification helper -- check a (Rin, Rout, L, current) config against a
+# known reference Bz(z), with NO fitting (AMP_TO_JPHI is a physical constant).
 # ---------------------------------------------------------------------------
 
 
-def calibrate_jphi(reference_bz_peak: float, at_current: float) -> float:
-    """Return the CURRENT_TO_JPHI factor reproducing a known peak on-axis Bz.
-
-    Given the known peak on-axis field ``reference_bz_peak`` [CLHEP field units]
-    for a single solenoid at deck ``at_current``, solve for the jphi that
-    produces it (the field is linear in jphi), then divide by the current. Uses
-    the thin-shell-at-inner-radius model (see the CALIBRATION note above).
+def predicted_bz_onaxis(
+    current: float,
+    z: float,
+    *,
+    Rin: float = SOLENOID_RIN,
+    Rout: float = SOLENOID_ROUT,
+    L: float = SOLENOID_LENGTH,
+    num_shells: int = SOLENOID_NSHEETS,
+) -> float:
+    """On-axis Bz(z) [CLHEP field units] predicted for a coil at ``current``
+    [Amp/mm^2], with no fitting -- see the CALIBRATION note above.
     """
-    probe = ThinShellSolenoid(R=SOLENOID_SHELL_R, jphi=1.0, L=SOLENOID_LENGTH)
-    _, bz_per_unit_jphi = probe.B_elliptic(1e-6, 0.0)
-    jphi_needed = reference_bz_peak / bz_per_unit_jphi
-    return float(jphi_needed / at_current)
+    coil = ThickSolenoid(Rin=Rin, Rout=Rout, jphi=current * AMP_TO_JPHI, L=L)
+    _, bz = coil.B_shells(1e-6, z, num_shells=num_shells, vmap=True)
+    return float(bz)

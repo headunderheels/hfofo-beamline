@@ -58,14 +58,13 @@ The `beamline` dependency is pinned to commit `c01b42f` (which includes the
   correctness oracle -- `tests/test_lattice.py::test_batched_matches_oracle_rf`
   (marked `slow`) asserts the two agree. The batched field-sum is general and is
   intended to be lifted upstream into `beamline` once proven here.
-- The solenoid `current -> jphi` conversion is **calibrated** against the G4BL
-  single-solenoid reference trace (`CURRENT_TO_JPHI = 8.614e11`), matching the
-  on-axis Bz profile to <=1.4%. **Modeling caveat:** this uses a *thin shell at
-  the inner radius* (420mm), because G4BL's coil falls off faster than
-  `beamline.ThickSolenoid` (a ~12% z=300mm discrepancy that is a radial
-  current-model difference, not a bug). Flagged in `build.py` for later
-  investigation / possible upstream discussion.
-- Wedges (milestone C) are loaded but not yet built into material volumes.
+- The solenoid `current -> jphi` conversion (`AMP_TO_JPHI`) is an exact
+  physical unit conversion (Amp -> e/ns), not a fit. Solenoids are modeled as
+  `ThickSolenoid` (uniform-current-density annulus, G4BL's own `nSheets=10`
+  discretization) -- verified bit-for-bit against a standalone compile of
+  G4BL's actual `BLCoil.cc`. See `build.py`'s CALIBRATION note.
+- Wedges (milestone C) are built into material volumes (`build_wedges`,
+  `UnionMaterial`) and used by the stochastic tracker (`scripts/track_stochastic.py`).
 
 ## Tests
 

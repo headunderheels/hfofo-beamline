@@ -184,7 +184,7 @@ def build_lattice_dict(input_dir: Path) -> dict:
         },
         "notes": (
             "Angles in radians; z absolute in mm. Solenoid current in deck "
-            "engineering units (4.421*BLS scaling); convert via build.CURRENT_TO_JPHI."
+            "engineering units (4.421*BLS scaling); convert via build.AMP_TO_JPHI."
         ),
     }
     return {
