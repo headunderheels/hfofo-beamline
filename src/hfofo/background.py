@@ -19,11 +19,13 @@ import dataclasses
 
 import equinox as eqx
 import hepunits as u
+import jax
 import jax.numpy as jnp
+import jax.random as jr
 
 from beamline.jax.absorber.material import DensityCorrection, Material, StragglingParams
 from beamline.jax.absorber.volume import MaterialVolume
-from beamline.jax.coordinates import Cartesian3, Tangent
+from beamline.jax.coordinates import Cartesian3, Cartesian4, Tangent
 from beamline.jax.kinematics import MuonStateDz, ParticleState
 from beamline.jax.types import SBool, SFloat
 
@@ -224,9 +226,80 @@ def apply_energy_loss(state: MuonStateDz, dE: SFloat) -> MuonStateDz:
     m2 = E**2 - pmag**2
     pmag_new = jnp.sqrt(jnp.maximum(E_new**2 - m2, 1e-6))
     scale = pmag_new / pmag
-    from beamline.jax.coordinates import Cartesian4
-
     new_t = Cartesian4.make(x=p.x * scale, y=p.y * scale, z=p.z * scale, ct=E_new)
+    return MuonStateDz(kin=Tangent(p=state.kin.p, t=new_t), q=state.q)
+
+
+# ---------------------------------------------------------------------------
+# Multiple Coulomb scattering (Highland formula)
+# ---------------------------------------------------------------------------
+# beamline's absorber physics models only energy loss (mean + Landau
+# straggling) -- see absorber/volume.py's own module docstring: "the
+# stochastic interaction (energy straggling now, multiple scattering later)".
+# MCS is the dominant transverse-emittance-growth mechanism in a real
+# ionization-cooling channel (it's the physical reason such channels need
+# continuous RF reacceleration at all: energy loss cools, MCS reheats). Its
+# complete absence was flagged as a leading candidate for the tune-mismatch
+# beat seen against G4BL's true reference trace (design doc S9 residual
+# investigation) -- added here as an app-side kick, applied once per
+# track_with_drag step from the combined variance of every material crossed
+# in that step (Highland's thin-scatterer variances add linearly).
+#
+# Radiation lengths (X0): PDG mass radiation length divided by density, using
+# the SAME density values already assumed above for GH2/STAINLESS_316/
+# BERYLLIUM, plus a standard solid-LiH density for the wedges. Not derived
+# from beamline's own Material class -- its density/mass fields are stored in
+# an internal representation not straightforwardly convertible back to
+# g/cm^3 without reading its source in detail; using independent PDG-table
+# values here instead, the same approach background.py already takes for
+# GH2/STAINLESS_316/BERYLLIUM's other constants (mean_excitation etc).
+_LIH_DENSITY = 0.820 * u.g / u.cm3  # PDG-standard value for solid LiH
+X0_GH2 = (63.05 * u.g / u.cm2) / _GH2_DENSITY  # hydrogen; mass X0 = 63.05 g/cm^2
+X0_STAINLESS_316 = (13.84 * u.g / u.cm2) / (8.00 * u.g / u.cm3)  # iron-like
+X0_BERYLLIUM = (65.19 * u.g / u.cm2) / (1.848 * u.g / u.cm3)
+X0_LIH = (79.62 * u.g / u.cm2) / _LIH_DENSITY
+
+
+def highland_theta0_squared(state: MuonStateDz, thickness: SFloat, X0: SFloat) -> SFloat:
+    """Squared RMS projected multiple-scattering angle [rad^2] (PDG/Highland).
+
+    theta0 = (13.6 MeV / (beta*p)) * sqrt(x/X0) * [1 + 0.038 ln(x/(X0*beta^2))]
+    for a singly-charged particle (our muons, z=1). p [MeV], beta from the
+    current state; x the traversed thickness, X0 the material's radiation
+    length. Returns the SQUARED angle so multiple simultaneous crossings in
+    one step can be combined by summing (independent-thin-scatterer variances
+    add) before drawing a single kick. Guards thickness<=0 (returns 0, not
+    NaN from log(0)/sqrt(negative)).
+    """
+    t = state.kin.t
+    p = jnp.sqrt(t.x**2 + t.y**2 + t.z**2)
+    beta = p / t.ct
+    safe_x = jnp.where(thickness > 0.0, thickness, 1e-9 * u.mm)
+    ratio = safe_x / X0
+    theta0 = (13.6 * u.MeV / (beta * p)) * jnp.sqrt(ratio) * (
+        1.0 + 0.038 * jnp.log(ratio / beta**2)
+    )
+    return jnp.where(thickness > 0.0, theta0**2, 0.0)
+
+
+def apply_scattering_kick(state: MuonStateDz, theta0: SFloat, key) -> MuonStateDz:
+    """Apply one Highland-style MCS kick: independent Gaussian draws for the
+    two projected scattering angles (the standard small-angle treatment),
+    then rescale pz so the momentum magnitude (and hence kinetic energy) is
+    exactly conserved -- MCS changes direction, not energy. Rescaling exactly
+    rather than relying on the small-angle approximation to hold matters here
+    because many small kicks compound over hundreds of steps.
+    """
+    t = state.kin.t
+    p = jnp.sqrt(t.x**2 + t.y**2 + t.z**2)
+    kx, ky = jr.split(key)
+    dthx = theta0 * jr.normal(kx)
+    dthy = theta0 * jr.normal(ky)
+    new_x = t.x + p * dthx
+    new_y = t.y + p * dthy
+    new_z_sq = p**2 - new_x**2 - new_y**2
+    new_z = jnp.sign(t.z) * jnp.sqrt(jnp.maximum(new_z_sq, 0.0))
+    new_t = Cartesian4.make(x=new_x, y=new_y, z=new_z, ct=t.ct)
     return MuonStateDz(kin=Tangent(p=state.kin.p, t=new_t), q=state.q)
 
 
@@ -244,12 +317,14 @@ def track_with_drag(
     rtol: float = 1e-5,
     atol: float = 1e-7,
     n_steps: int | None = None,
+    key: jax.Array | None = None,
 ):
     """Track a muon through ``field`` (solenoids+RF) with GH2 background drag,
     the ``presswall``, cavity Be windows, and (optionally) the LiH wedge
     absorbers folded in self-consistently, one small ``dz`` step at a time: a
     field-only ``diffrax_solve`` mini-step, followed by analytic energy-loss
-    kicks for that same step. Not implemented via ``stochastic_solve`` -- that
+    kicks and (if ``key`` is given) a multiple-Coulomb-scattering kick, for
+    that same step. Not implemented via ``stochastic_solve`` -- that
     machinery's kick-detection is keyed off the *sign* of
     ``signed_time_to_boundary``, which doesn't have a consistent meaning for a
     material that's always present (see ``BackgroundAndWedges``'s docstring
@@ -262,14 +337,20 @@ def track_with_drag(
     specifically (the deck's only cavity variant without
     ``cavityMaterial=GH2``); omit to apply GH2 everywhere uniformly.
 
-    Wedge handling here is simpler than ``stochastic_solve``'s boundary-aware
-    crossing logic: at each step we just check whether the CURRENT position is
-    inside any wedge (``wedges.contains``) and, if so, apply that wedge's
-    straggling loss for the full step thickness ``dz``. Since ``dz`` (default
-    25mm) is comparable to or a bit smaller than a wedge's thickness
-    (~26-60mm), this resolves crossings to within about one step -- adequate
-    for the wedges' small individual contribution, not precise enough to trust
-    for anything wedge-crossing-dominated.
+    ``key``: if given, applies one multiple-Coulomb-scattering kick per step
+    (Highland formula; see ``highland_theta0_squared``/``apply_scattering_kick``),
+    combining the variance from every material crossed in that step (GH2,
+    presswall, windows, wedge) before drawing a single Gaussian kick. Pass
+    ``None`` to skip MCS entirely (energy-loss-only, matching this function's
+    original behavior). ``beamline``'s own absorber physics does not model
+    MCS at all (see the module-level note above ``highland_theta0_squared``);
+    this is an app-side addition.
+
+    Wedge crossing thickness uses the exact geometric formula
+    ``stochastic_solve``'s substep uses (signed-distance at both step
+    endpoints plus true displacement), not a containment guess -- both the
+    energy-loss and (if enabled) the scattering-kick calculations for the
+    wedge use this same thickness.
 
     ``n_steps`` must be a concrete Python int (not a traced value) when calling
     this under ``jax.jit`` -- pass it explicitly if ``z0``/``z1`` are traced;
@@ -278,18 +359,19 @@ def track_with_drag(
     Returns (final_state, (z, x, y, ct, px, py, pz, E)) -- one row per dz step
     (not including the start point).
     """
-    import jax
     from beamline.jax.integrate.propagate import diffrax_solve
 
     if n_steps is None:
         n_steps = int(round(float((z1 - z0) / dz)))
+    step_keys = jr.split(key, n_steps) if key is not None else None
 
-    def one_step(state, i):
+    def one_step(state, i, step_key):
         zc0 = z0 + i * dz
         zc1 = zc0 + dz
         zs = jnp.array([zc0, zc1])
         track, _ = diffrax_solve(field, state, zs, forward_mode=True, rtol=rtol, atol=atol)
         state = jax.tree.map(lambda a: a[-1], track)
+        theta0_sq = 0.0
         if rfc0_centers is not None:
             # No GH2 inside an RFC0 cavity's interior (real deck has vacuum
             # there) -- step size is small relative to the 249mm cavity
@@ -300,17 +382,20 @@ def track_with_drag(
         else:
             gh2_dz = dz
         dE_gh2 = GH2.straggling_params(state, gh2_dz).mean_energy_loss
+        theta0_sq = theta0_sq + highland_theta0_squared(state, gh2_dz, X0_GH2)
         state = apply_energy_loss(state, dE_gh2)
         if include_presswall:
             # PRESSWALL_Z falling within this step's [zc0, zc1) range is a
             # runtime (traced) condition, not a static Python index -- z0/z1
             # may themselves be traced values under an outer jax.jit.
             crosses_wall = (zc0 <= PRESSWALL_Z) & (PRESSWALL_Z < zc1)
+            wall_thickness = jnp.where(crosses_wall, PRESSWALL_THICKNESS, 0.0)
             dE_wall = jnp.where(
                 crosses_wall,
                 STAINLESS_316.straggling_params(state, PRESSWALL_THICKNESS).mean_energy_loss,
                 0.0,
             )
+            theta0_sq = theta0_sq + highland_theta0_squared(state, wall_thickness, X0_STAINLESS_316)
             state = apply_energy_loss(state, dE_wall)
         if window_z is not None:
             crosses_win = (zc0 <= window_z) & (window_z < zc1)
@@ -318,8 +403,13 @@ def track_with_drag(
             def one_window(thick):
                 return BERYLLIUM.straggling_params(state, thick).mean_energy_loss
 
+            def one_window_theta0sq(thick):
+                return highland_theta0_squared(state, thick, X0_BERYLLIUM)
+
             dE_each = jax.vmap(one_window)(window_thick)
+            theta0sq_each = jax.vmap(one_window_theta0sq)(window_thick)
             dE_win = jnp.sum(jnp.where(crosses_win, dE_each, 0.0))
+            theta0_sq = theta0_sq + jnp.sum(jnp.where(crosses_win, theta0sq_each, 0.0))
             state = apply_energy_loss(state, dE_win)
         if wedges is not None:
             # Wedges are only ~26-60mm thick; naive containment checks against
@@ -361,13 +451,28 @@ def track_with_drag(
             safe_thickness = jnp.where(raw_thickness <= 0.0, 1e-6 * u.mm, raw_thickness)
             dE_raw = wedges.interaction_params(state, safe_thickness).mean_energy_loss
             dE_wedge = jnp.where(raw_thickness > 0.0, dE_raw, 0.0)
+            theta0sq_wedge_raw = highland_theta0_squared(state, safe_thickness, X0_LIH)
+            theta0_sq = theta0_sq + jnp.where(raw_thickness > 0.0, theta0sq_wedge_raw, 0.0)
             state = apply_energy_loss(state, dE_wedge)
+        if step_key is not None:
+            state = apply_scattering_kick(state, jnp.sqrt(theta0_sq), step_key)
         p, t = state.kin.p, state.kin.t
         return state, (zc1, p.x, p.y, p.ct, t.x, t.y, t.z, t.ct)
 
-    def scan_body(state, i):
-        new_state, out = one_step(state, i)
-        return new_state, out
+    if key is None:
 
-    final_state, outs = jax.lax.scan(scan_body, start, jnp.arange(n_steps))
+        def scan_body(state, i):
+            return one_step(state, i, None)
+
+        final_state, outs = jax.lax.scan(scan_body, start, jnp.arange(n_steps))
+    else:
+        step_keys = jr.split(key, n_steps)
+
+        def scan_body(state, xi):
+            i, step_key = xi
+            return one_step(state, i, step_key)
+
+        final_state, outs = jax.lax.scan(
+            scan_body, start, (jnp.arange(n_steps), step_keys)
+        )
     return final_state, outs

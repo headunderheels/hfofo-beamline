@@ -34,6 +34,7 @@ import beamline.jax  # noqa: F401  (enables jax_enable_x64)
 import hepunits as u
 import jax
 import jax.numpy as jnp
+import jax.random as jr
 import numpy as np
 
 from beamline.jax.coordinates import Cartesian3, Cartesian4, Tangent
@@ -44,7 +45,14 @@ from hfofo.load import load_lattice
 from hfofo.union_material import build_union_material
 
 DATA = "data/hfofo.yaml"
-OUT = "artifacts/full_channel_trajectory.csv"
+OUT = os.environ.get("HFOFO_OUT", "artifacts/full_channel_trajectory.csv")
+SEED = int(os.environ.get("HFOFO_SEED", "0"))
+# MCS defaults OFF: an ensemble study (design doc S9) found it does not close
+# the tune-mismatch residual and adds variance without a clear benefit -- the
+# milestone-C baseline result is the no-MCS trajectory. Set HFOFO_MCS=1 to
+# opt back in (e.g. for emittance-growth studies where MCS itself matters,
+# independent of this residual question).
+USE_MCS = os.environ.get("HFOFO_MCS", "0") == "1"
 BEAM_START = -700.0 * u.mm
 REF_MOMENTUM = 247.5 * u.MeV
 MUON_MASS = 105.6583715 * u.MeV
@@ -105,7 +113,7 @@ def main() -> None:
         z0 = BEAM_START
 
     run = jax.jit(
-        lambda s, z0, z1, n: track_with_drag(
+        lambda s, z0, z1, n, key: track_with_drag(
             channel,
             s,
             z0,
@@ -117,6 +125,7 @@ def main() -> None:
             window_thick=window_thick,
             rfc0_centers=rfc0_centers,
             n_steps=n,
+            key=key,
             rtol=1e-3,
             atol=1e-5,
         ),
@@ -125,10 +134,12 @@ def main() -> None:
 
     t0 = time.time()
     i = 0
+    base_key = jr.key(SEED)
     while z0 < z_end - 1e-6:
         z1 = min(z0 + CHUNK_PERIODS * period, z_end)
         n = int(round((z1 - z0) / DZ))
-        state, outs = run(state, z0, z1, n)
+        chunk_key = jr.fold_in(base_key, i) if USE_MCS else None
+        state, outs = run(state, z0, z1, n, chunk_key)
         jax.block_until_ready(outs[0])
         zc, x, y, ct, px, py, pz, E = (np.asarray(o) for o in outs)
         with open(OUT, "a") as f:
