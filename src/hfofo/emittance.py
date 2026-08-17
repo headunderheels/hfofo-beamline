@@ -103,3 +103,39 @@ def covariance4(x, px, y, py) -> jnp.ndarray:
     """
     phase = jnp.stack([x, px, y, py], axis=0)  # (4, N)
     return jnp.cov(phase)
+
+
+def weighted_covariance4(x, px, y, py, weights: jnp.ndarray) -> jnp.ndarray:
+    """Weighted 4x4 covariance of (x, px, y, py), differentiable in
+    ``weights`` (unlike excluding particles via boolean/NumPy indexing,
+    which drops out of the JAX trace and breaks jax.jvp through anything
+    downstream).
+
+    Intended use: a soft or hard aperture cut. ``weights = jnp.where(r >
+    aperture_radius, 0.0, 1.0)`` reproduces "exclude lost particles from
+    the covariance" while staying differentiable -- gradients flow
+    correctly on either side of the cut, since the aperture condition
+    itself is ordinary JAX control flow (`jnp.where`, not a Python `if` on
+    a traced value). Right AT a particle's cut boundary the merit is
+    genuinely non-smooth (a particle discretely enters/leaves the sample as
+    a design parameter crosses the value that puts that particle exactly at
+    the aperture) -- this is an inherent property of hard apertures, not a
+    bug in this implementation; a gradient-based optimizer step from
+    exactly that point is locally unreliable but nothing else is.
+
+    Uses population (sum(weights)) normalization, not the N-1 (Bessel-
+    corrected) normalization ``covariance4``/``jnp.cov`` use by default --
+    a fixed, small, weight-independent-in-the-all-ones-case rescaling
+    that matters for matching an exact reported number but not for
+    gradients or relative comparisons. With all weights equal to 1, this
+    differs from ``covariance4`` by exactly the N/(N-1) factor; it does NOT
+    reduce to bit-identical output even in that limit -- compare
+    the two intentionally if you need to know which convention a given
+    reported number uses.
+    """
+    w = weights
+    wsum = jnp.sum(w)
+    phase = jnp.stack([x, px, y, py], axis=0)  # (4, N)
+    mean = jnp.sum(phase * w[None, :], axis=1) / wsum  # (4,)
+    centered = phase - mean[:, None]
+    return (centered * w[None, :]) @ centered.T / wsum
