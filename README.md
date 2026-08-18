@@ -23,6 +23,8 @@ tests/
   test_lattice.py
 ```
 
+![Visualization of the codebase](./diagram.svg)
+
 ## Data provenance
 
 `data/hfofo.yaml` is extracted once from the G4Beamline frozen input
