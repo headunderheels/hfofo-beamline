@@ -139,3 +139,100 @@ def weighted_covariance4(x, px, y, py, weights: jnp.ndarray) -> jnp.ndarray:
     mean = jnp.sum(phase * w[None, :], axis=1) / wsum  # (4,)
     centered = phase - mean[:, None]
     return (centered * w[None, :]) @ centered.T / wsum
+
+
+# ---------------------------------------------------------------------------
+# 6D (full transverse + longitudinal) eigen-emittances
+# ---------------------------------------------------------------------------
+# Same Williamson's-theorem approach as the 4D case above, generalized to
+# three canonical pairs instead of two. Convention: (x, px, y, py, ct, E) --
+# the longitudinal pair matches this codebase's existing position/momentum
+# representation directly (Tangent[Cartesian4]'s p=(x,y,z,ct) and
+# t=(px,py,pz,E), with z the independent tracking variable rather than a
+# phase-space coordinate; ct and E are the natural remaining canonical pair).
+#
+# For a positive-definite 6x6 covariance Sigma and the canonical symplectic
+# form S (block-diagonal, three [[0,1],[-1,0]] blocks), the eigenvalues of
+# M = Sigma @ S come in three conjugate pairs +-i*eps1, +-i*eps2, +-i*eps3.
+# tr(M) = 0 (same cyclic-trace argument as the 4D case: Sigma symmetric, S
+# antisymmetric). For THIS eigenvalue structure (symmetric about 0), the
+# characteristic polynomial is also EVEN in lambda, so tr(M^3) = 0 too (each
+# +-i*eps pair contributes (i eps)^3 + (-i eps)^3 = 0). Using Newton's
+# identities (relating power sums p_k=tr(M^k) to elementary symmetric
+# polynomials e_k of the eigenvalues, with e1=p1=0 substituted in):
+#     e2 = -p2/2               = -tr(M@M)/2
+#     e3 = p3/3                = 0   (confirms the "even" structure, not used)
+#     e4 = p2^2/8 - p4/4        = tr(M@M)^2/8 - tr(M@M@M@M)/4
+# With a=eps1^2, b=eps2^2, c=eps3^2: a+b+c=e2, ab+ac+bc=e4, abc=det(M) (the
+# standard elementary-symmetric/Vieta relation for a monic cubic's roots).
+# Solved via the trigonometric (Cardano/Viete) closed form for a depressed
+# cubic with three real roots -- no eigendecomposition anywhere, so this
+# differentiates via ordinary jax.jvp/jax.grad exactly like the 4D case.
+#
+# Verified (see tests/test_emittance.py): exact match against the analytic
+# uncoupled case (three independent 2x2 blocks reduce to the three ordinary
+# 2D emittances); exact match against an independent, non-differentiable
+# oracle (plain numpy.linalg.eig) on random genuinely-coupled 6x6
+# covariances; forward-mode AD matches finite-difference at an
+# appropriately-sized step (same FD-conditioning caveat as the 4D case --
+# see test_emittance.py's docstring for why eps=1e-2 is the right FD step,
+# not a smaller one).
+_S6 = jnp.array(
+    [
+        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 0.0, -1.0, 0.0],
+    ]
+)
+
+
+def eigen_emittances_6d(sigma6: jnp.ndarray) -> jnp.ndarray:
+    """The three eigen-emittances of a 6D phase space (x, px, y, py, ct, E),
+    as an array [eps1, eps2, eps3] with eps1 >= eps2 >= eps3 (no ordering is
+    physically privileged; this is just the order the cubic solve produces).
+    Fully differentiable via jax.jvp -- see the module note above.
+    """
+    S = _S6.astype(sigma6.dtype)
+    M = sigma6 @ S
+    p2 = jnp.trace(M @ M)
+    p4 = jnp.trace(M @ M @ M @ M)
+    c2 = -p2 / 2.0
+    c4 = p2**2 / 8.0 - p4 / 4.0
+    c6 = jnp.linalg.det(M)
+    # cubic in t=eps^2: t^3 - c2 t^2 + c4 t - c6 = 0. Depress via t = s + c2/3.
+    p = c4 - c2**2 / 3.0
+    q = -2 * c2**3 / 27.0 + c2 * c4 / 3.0 - c6
+    safe_p = jnp.where(p < 0.0, p, -1e-30)  # guard sqrt(-3/p); p<0 for 3 real roots
+    arg = jnp.clip((3 * q) / (2 * safe_p) * jnp.sqrt(-3.0 / safe_p), -1.0, 1.0)
+    theta = jnp.arccos(arg)
+    roots = jnp.stack(
+        [
+            2 * jnp.sqrt(-safe_p / 3.0) * jnp.cos(theta / 3.0 - 2 * jnp.pi * k / 3.0) + c2 / 3.0
+            for k in range(3)
+        ]
+    )
+    return jnp.sort(jnp.sqrt(jnp.maximum(roots, 0.0)))[::-1]
+
+
+def covariance6(x, px, y, py, ct, E) -> jnp.ndarray:
+    """6x6 covariance of (x, px, y, py, ct, E) -- the 6D analogue of
+    ``covariance4``. See that function's docstring for the convention note.
+    """
+    phase = jnp.stack([x, px, y, py, ct, E], axis=0)  # (6, N)
+    return jnp.cov(phase)
+
+
+def weighted_covariance6(x, px, y, py, ct, E, weights: jnp.ndarray) -> jnp.ndarray:
+    """Weighted 6x6 covariance -- the 6D analogue of ``weighted_covariance4``.
+    See that function's docstring for the aperture-cut usage pattern and the
+    population- vs Bessel-normalization note (same convention here: population).
+    """
+    w = weights
+    wsum = jnp.sum(w)
+    phase = jnp.stack([x, px, y, py, ct, E], axis=0)  # (6, N)
+    mean = jnp.sum(phase * w[None, :], axis=1) / wsum
+    centered = phase - mean[:, None]
+    return (centered * w[None, :]) @ centered.T / wsum

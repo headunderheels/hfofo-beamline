@@ -18,9 +18,12 @@ import hepunits as u
 
 from hfofo.emittance import (
     covariance4,
+    covariance6,
     eigen_emittances,
+    eigen_emittances_6d,
     naive_projected_emittances,
     weighted_covariance4,
+    weighted_covariance6,
 )
 from hfofo.reference_data import find_file
 
@@ -274,3 +277,99 @@ def load_lattice_fixture():
     from hfofo.load import load_lattice
 
     return load_lattice(Path(__file__).parent.parent / "data" / "hfofo.yaml")
+
+
+# --- 6D (transverse + longitudinal) eigen-emittances ---
+
+
+def test_6d_uncoupled_case_matches_analytic():
+    """Three independent 2x2 blocks must reduce to the three ordinary 2D
+    emittances -- the 6D analogue of test_uncoupled_case_matches_naive_projected_emittances.
+    """
+    sx = jnp.array([[4.0, 0.5], [0.5, 1.0]])
+    sy = jnp.array([[9.0, -0.3], [-0.3, 0.5]])
+    sz = jnp.array([[2.0, 0.4], [0.4, 3.0]])
+    sigma6 = jnp.zeros((6, 6))
+    sigma6 = sigma6.at[0:2, 0:2].set(sx).at[2:4, 2:4].set(sy).at[4:6, 4:6].set(sz)
+    expected = sorted(
+        [float(jnp.sqrt(jnp.linalg.det(s))) for s in (sx, sy, sz)], reverse=True
+    )
+    got = sorted([float(v) for v in eigen_emittances_6d(sigma6)], reverse=True)
+    assert got == pytest.approx(expected, rel=1e-6)
+
+
+def test_6d_matches_independent_eig_oracle():
+    """Cross-check against plain numpy.linalg.eig (NOT JAX's -- not
+    differentiable, used here purely as a numerical correctness oracle) on
+    random genuinely-coupled 6x6 covariances. This is the 6D analogue of the
+    4D module's implicit exact-match derivation check, done directly against
+    an eigendecomposition rather than only an analytic special case.
+    """
+    rng = np.random.default_rng(1)
+    for _ in range(5):
+        A = rng.normal(size=(6, 300))
+        sigma6 = np.cov(A)
+        S = np.zeros((6, 6))
+        for i in range(3):
+            S[2 * i, 2 * i + 1] = 1.0
+            S[2 * i + 1, 2 * i] = -1.0
+        M = sigma6 @ S
+        oracle = sorted({round(v, 4) for v in np.abs(np.linalg.eig(M)[0].imag)}, reverse=True)
+        mine = sorted([round(float(v), 4) for v in eigen_emittances_6d(jnp.array(sigma6))], reverse=True)
+        assert oracle == pytest.approx(mine, abs=1e-3)
+
+
+def test_6d_product_equals_sqrt_det_sigma6():
+    """eps1*eps2*eps3 == sqrt(det(sigma6)) always (the 6D phase-space volume
+    identity) -- the 6D analogue of test_product_equals_sqrt_det_sigma4.
+    """
+    rng = np.random.default_rng(2)
+    A = rng.normal(size=(6, 200))
+    sigma6 = jnp.array(np.cov(A))
+    eps = eigen_emittances_6d(sigma6)
+    assert float(jnp.prod(eps)) == pytest.approx(
+        float(jnp.sqrt(jnp.linalg.det(sigma6))), rel=1e-5
+    )
+
+
+def test_6d_forward_mode_ad_matches_finite_difference():
+    """Same FD-conditioning caveat as the 4D case (test_forward_mode_ad_matches_finite_difference):
+    use eps=1e-2, not a smaller value -- this formula's sqrt/arccos structure
+    is numerically delicate for FD, not for AD.
+    """
+
+    def merit(off_diag):
+        sigma6 = jnp.eye(6) * jnp.array([4.0, 1.0, 9.0, 0.5, 2.0, 3.0])
+        sigma6 = sigma6.at[0, 2].set(off_diag).at[2, 0].set(off_diag)
+        return jnp.prod(eigen_emittances_6d(sigma6))
+
+    x0 = 0.8
+    _, tangent = jax.jvp(merit, (x0,), (1.0,))
+    eps = 1e-2
+    fd = (float(merit(x0 + eps)) - float(merit(x0 - eps))) / (2 * eps)
+    assert float(tangent) == pytest.approx(fd, rel=1e-3)
+
+
+def test_covariance6_matches_numpy_cov():
+    rng = np.random.default_rng(3)
+    x, px, y, py, ct, E = (rng.normal(size=50) for _ in range(6))
+    got = np.array(
+        covariance6(jnp.array(x), jnp.array(px), jnp.array(y), jnp.array(py), jnp.array(ct), jnp.array(E))
+    )
+    expected = np.cov(np.stack([x, px, y, py, ct, E]))
+    np.testing.assert_allclose(got, expected, rtol=1e-6)
+
+
+def test_weighted_covariance6_all_ones_matches_population_convention():
+    """weighted_covariance6 with all weights=1 should match a population-
+    normalized (not Bessel-corrected) 6x6 covariance -- same convention note
+    as weighted_covariance4."""
+    rng = np.random.default_rng(4)
+    x, px, y, py, ct, E = (rng.normal(size=30) for _ in range(6))
+    weights = jnp.ones(30)
+    got = np.array(weighted_covariance6(jnp.array(x), jnp.array(px), jnp.array(y), jnp.array(py), jnp.array(ct), jnp.array(E), weights))
+    phase = np.stack([x, px, y, py, ct, E])
+    mean = phase.mean(axis=1, keepdims=True)
+    centered = phase - mean
+    expected = (centered @ centered.T) / 30  # population normalization
+    np.testing.assert_allclose(got, expected, rtol=1e-6)
