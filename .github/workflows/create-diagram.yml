@@ -1,17 +1,18 @@
-
-name: Create diagram
+name: Repo visualizer
 on:
-  workflow_dispatch: {}
   push:
     branches:
       - main
+permissions:
+  contents: write
 jobs:
   get_data:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@master
+        uses: actions/checkout@v4
       - name: Update diagram
         uses: githubocto/repo-visualizer@main
         with:
-          excluded_paths: "ignore,.github"
+          output_file: "diagram.svg"
+          excluded_paths: "node_modules,dist,.git"
