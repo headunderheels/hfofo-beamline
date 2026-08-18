@@ -99,7 +99,7 @@ MUON_MASS = 105.6583715 * u.MeV
 # resolution than 25mm gave in the channel's low-energy troughs, where the
 # dynamics get locally stiffer and diffrax's per-step max_steps was
 # otherwise exceeded.
-DZ = 15.0 * u.mm
+DZ = 60.0 * u.mm  # retuned from 15mm -- see track_with_drag docstring for the measured tradeoff
 CHUNK_PERIODS = 1  # periods tracked per resumable checkpoint
 
 

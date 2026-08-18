@@ -45,7 +45,11 @@ import numpy as np
 
 from beamline.jax.coordinates import Cartesian3, Cartesian4, Tangent
 from beamline.jax.kinematics import MuonStateDz
-from hfofo.background import cavity_window_positions, rfc0_interior_centers, track_with_drag
+from hfofo.background import (
+    cavity_window_positions_windowed,
+    rfc0_interior_centers,
+    track_with_drag,
+)
 from hfofo.build import build_channel_batched_windowed, build_wedges_windowed
 from hfofo.emittance import covariance4, eigen_emittances, naive_projected_emittances
 from hfofo.load import load_lattice
@@ -58,7 +62,7 @@ PZ_CUT_MEV = 75.0
 PZ_CENTER_MEV = 247.5
 SAMPLE_SIZE = 24
 SAMPLE_SEED = 0
-DZ = 15.0 * u.mm
+DZ = 60.0 * u.mm  # retuned from 15mm -- see track_with_drag docstring for the measured tradeoff
 
 # Tightest iris radius anywhere in the deck (RFC2's irisRadius=200mm; RFC0/RFC
 # use 300mm, RFC1 uses 250mm) -- a simple, conservative, physically-motivated
@@ -159,7 +163,7 @@ def track_ensemble(n: int, n_periods: int = 1, rtol: float = 1e-3, atol: float =
     z_center = float((z0 + z1) / 2)
     channel = build_channel_batched_windowed(lattice, z_center=z_center)
     wedges = build_union_material(build_wedges_windowed(lattice, z_center=z_center))
-    window_z, window_thick = cavity_window_positions(lattice.cavities)
+    window_z, window_thick = cavity_window_positions_windowed(lattice.cavities, z_center=z_center)
     rfc0_centers = rfc0_interior_centers(lattice.cavities)
 
     def track_one(state):

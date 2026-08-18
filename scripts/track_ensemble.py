@@ -40,7 +40,7 @@ N_ENSEMBLE = int(os.environ.get("HFOFO_N_ENSEMBLE", "4"))
 BEAM_START = -700.0 * u.mm
 REF_MOMENTUM = 247.5 * u.MeV
 MUON_MASS = 105.6583715 * u.MeV
-DZ = 15.0 * u.mm
+DZ = 60.0 * u.mm  # retuned from 15mm -- see track_with_drag docstring for the measured tradeoff
 CHUNK_PERIODS = 1
 
 

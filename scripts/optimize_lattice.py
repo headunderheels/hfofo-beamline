@@ -58,7 +58,11 @@ import numpy as np
 import optax
 
 from emittance_sandbox import APERTURE_RADIUS, load_sample, make_ensemble_state
-from hfofo.background import cavity_window_positions, rfc0_interior_centers, track_with_drag
+from hfofo.background import (
+    cavity_window_positions_windowed,
+    rfc0_interior_centers,
+    track_with_drag,
+)
 from hfofo.build import AMP_TO_JPHI, build_channel_batched_windowed, build_wedges_windowed
 from hfofo.emittance import eigen_emittances, weighted_covariance4
 from hfofo.load import load_lattice
@@ -69,7 +73,7 @@ DATA = "data/hfofo.yaml"
 N_ENSEMBLE = 6  # overridable via --n-ensemble; also read by diagnose_optimizer.py
 K_PARAMS = 3  # first K windowed solenoids' currents, as design parameters
 BEAM_START = -700.0 * u.mm
-DZ = 15.0 * u.mm
+DZ = 60.0 * u.mm  # retuned from 15mm -- see track_with_drag docstring for the measured tradeoff
 
 
 def build_pipeline(
@@ -107,7 +111,7 @@ def build_pipeline(
 
     base_channel = build_channel_batched_windowed(lattice, z_center=z_center)
     wedges = build_union_material(build_wedges_windowed(lattice, z_center=z_center))
-    window_z, window_thick = cavity_window_positions(lattice.cavities)
+    window_z, window_thick = cavity_window_positions_windowed(lattice.cavities, z_center=z_center)
     rfc0_centers = rfc0_interior_centers(lattice.cavities)
 
     nominal_params = base_channel.groups[0].stack.field.jphi[:K_PARAMS] / AMP_TO_JPHI

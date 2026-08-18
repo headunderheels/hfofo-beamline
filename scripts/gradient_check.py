@@ -27,7 +27,11 @@ import jax
 import jax.numpy as jnp
 
 from emittance_sandbox import load_sample, make_ensemble_state, APERTURE_RADIUS
-from hfofo.background import cavity_window_positions, rfc0_interior_centers, track_with_drag
+from hfofo.background import (
+    cavity_window_positions_windowed,
+    rfc0_interior_centers,
+    track_with_drag,
+)
 from hfofo.build import AMP_TO_JPHI, build_channel_batched_windowed, build_wedges_windowed
 from hfofo.emittance import eigen_emittances, weighted_covariance4
 from hfofo.load import load_lattice
@@ -37,7 +41,7 @@ from hfofo.union_material import build_union_material
 DATA = "data/hfofo.yaml"
 N_ENSEMBLE = 8
 BEAM_START = -700.0 * u.mm
-DZ = 15.0 * u.mm
+DZ = 60.0 * u.mm  # retuned from 15mm -- see track_with_drag docstring for the measured tradeoff
 
 
 def main() -> None:
@@ -53,7 +57,7 @@ def main() -> None:
 
     base_channel = build_channel_batched_windowed(lattice, z_center=z_center)
     wedges = build_union_material(build_wedges_windowed(lattice, z_center=z_center))
-    window_z, window_thick = cavity_window_positions(lattice.cavities)
+    window_z, window_thick = cavity_window_positions_windowed(lattice.cavities, z_center=z_center)
     rfc0_centers = rfc0_interior_centers(lattice.cavities)
 
     # The nominal current of the FIRST windowed solenoid (index 0 in the
