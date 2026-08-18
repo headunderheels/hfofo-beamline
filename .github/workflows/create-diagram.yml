@@ -11,8 +11,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Update diagram
-        uses: githubocto/repo-visualizer@main
+        uses: githubocto/repo-visualizer@a999615bdab757559bf94bda1fe6eef232765f85
         with:
           output_file: "diagram.svg"
           excluded_paths: "node_modules,dist,.git"
+          commit_message: "Repo visualizer: update diagram [skip ci]"
+          file_colors: '{"py": "#3572A5", "yaml": "#f4d03f", "yml": "#f4d03f", "toml": "#b56cf0", "md": "#4fc3f7", "html": "#ff7043", "json": "#ffd54f"}'
