@@ -18,4 +18,4 @@ jobs:
           output_file: "diagram.svg"
           excluded_paths: "node_modules,dist,.git"
           commit_message: "Repo visualizer: update diagram [skip ci]"
-          file_colors: '{"py": "#3572A5", "yaml": "#f4d03f", "yml": "#f4d03f", "toml": "#b56cf0", "md": "#4fc3f7", "html": "#ff7043", "json": "#ffd54f"}'
+          file_colors: '{"py": "#1982C4", "yaml": "#8AC926", "yml": "#8AC926", "toml": "#6A4C93", "lock": "#6A4C93", "md": "#1982C4", "html": "#FFCA3A", "json": "#8AC926"}'
