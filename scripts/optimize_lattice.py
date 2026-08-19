@@ -73,7 +73,13 @@ DATA = "data/hfofo.yaml"
 N_ENSEMBLE = 6  # overridable via --n-ensemble; also read by diagnose_optimizer.py
 K_PARAMS = 3  # first K windowed solenoids' currents, as design parameters
 BEAM_START = -700.0 * u.mm
-DZ = 60.0 * u.mm  # retuned from 15mm -- see track_with_drag docstring for the measured tradeoff
+DZ = 15.0 * u.mm  # REVERTED from 60mm -- see optimize_taper.py's d73df4b for why: a real,
+           # reproduced failure ("max_steps was reached") at multi-period,
+           # N>=24 scale that the original 60mm retuning was never tested
+           # against (only verified for one particle over one period). This
+           # script had not been re-tested at that scale either -- reverted
+           # here as a precaution, not because THIS script was independently
+           # confirmed to fail, matching the same reasoning.
 
 
 def build_pipeline(
@@ -280,11 +286,21 @@ def optimize(merit, nominal_params, n_steps=3, lr=0.5, checkpoint_path=None, val
     warm-started step. For a long optimization campaign where momentum
     continuity actually matters, extend this to serialize opt_state too
     (e.g. via jax.tree_util.tree_flatten + np.savez).
+
+    Writes the checkpoint after EVERY step, not once after the whole loop
+    (a real bug, found the hard way in optimize_taper.py's twin function: a
+    run requesting several steps that crashed on the LAST one -- e.g.
+    hitting max_steps from the dz=60mm issue documented in
+    track_with_drag's docstring -- silently discarded every successfully-
+    completed earlier step from that invocation, since nothing had been
+    written to disk yet when the exception propagated out of the loop).
     """
     print(f"\noptimizing {K_PARAMS} parameters for {n_steps} more step(s) (Adam, lr={lr})...")
     params = nominal_params
+    prior = []
     if checkpoint_path is not None and os.path.exists(checkpoint_path):
-        saved = np.loadtxt(checkpoint_path)
+        saved = np.loadtxt(checkpoint_path, ndmin=2)
+        prior = saved.tolist()
         params = jnp.array(saved[-1, :K_PARAMS])
         print(f"resuming from checkpoint: {len(saved)} step(s) already done, "
               f"last merit={saved[-1, K_PARAMS]:.4f}")
@@ -296,25 +312,19 @@ def optimize(merit, nominal_params, n_steps=3, lr=0.5, checkpoint_path=None, val
     opt_state = optimizer.init(params)
     grad_and_val = jax.jit(value_and_grad_fn)
 
-    rows = []
     for step in range(n_steps):
         t0 = time.time()
         val, grad = grad_and_val(params)
         updates, opt_state = optimizer.update(grad, opt_state)
         params = optax.apply_updates(params, updates)
         dt = time.time() - t0
-        rows.append(list(np.asarray(params)) + [float(val)])
+        prior.append(list(np.asarray(params)) + [float(val)])
         print(f"  step {step}: merit={float(val):.4f}  params={params}  ({dt:.1f}s)")
+        if checkpoint_path is not None:
+            np.savetxt(checkpoint_path, np.array(prior))
 
     if checkpoint_path is not None:
-        prior = []
-        if os.path.exists(checkpoint_path):
-            prior = np.loadtxt(checkpoint_path).tolist()
-            if prior and not isinstance(prior[0], list):
-                prior = [prior]
-        all_rows = prior + rows
-        np.savetxt(checkpoint_path, np.array(all_rows))
-        print(f"wrote {checkpoint_path} ({len(all_rows)} step(s) total)")
+        print(f"wrote {checkpoint_path} ({len(prior)} step(s) total)")
 
     final_val = float(merit(params))
     print(f"\ncurrent merit={final_val:.4f}")

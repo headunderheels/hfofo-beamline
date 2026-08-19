@@ -99,7 +99,13 @@ MUON_MASS = 105.6583715 * u.MeV
 # resolution than 25mm gave in the channel's low-energy troughs, where the
 # dynamics get locally stiffer and diffrax's per-step max_steps was
 # otherwise exceeded.
-DZ = 60.0 * u.mm  # retuned from 15mm -- see track_with_drag docstring for the measured tradeoff
+DZ = 15.0 * u.mm  # REVERTED from 60mm -- see optimize_taper.py's d73df4b for why: a real,
+           # reproduced failure ("max_steps was reached") at multi-period,
+           # N>=24 scale that the original 60mm retuning was never tested
+           # against (only verified for one particle over one period). This
+           # script had not been re-tested at that scale either -- reverted
+           # here as a precaution, not because THIS script was independently
+           # confirmed to fail, matching the same reasoning.
 CHUNK_PERIODS = 1  # periods tracked per resumable checkpoint
 
 

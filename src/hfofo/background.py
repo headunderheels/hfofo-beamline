@@ -342,7 +342,7 @@ def track_with_drag(
     start: MuonStateDz,
     z0: SFloat,
     z1: SFloat,
-    dz: SFloat = 60.0 * u.mm,
+    dz: SFloat = 15.0 * u.mm,
     include_presswall: bool = True,
     wedges: UnionMaterial | None = None,
     window_z: jnp.ndarray | None = None,
@@ -367,49 +367,63 @@ def track_with_drag(
     history / the module-level notes); a small-step deterministic loop sidesteps
     that entirely.
 
-    ``dz`` (default 60mm here, though the default in scripts/optimize_taper.py
-    has since been reverted to 15mm -- see below): retuned after measuring the
-    tradeoff directly, not by guessing. On a stable single-particle trajectory
-    (1 lattice period): ~2.3x faster (2.1s -> 0.9s post-compile) with a
-    ~0.25 MeV (~0.08%) difference in final energy, and forward-/reverse-mode
-    AD remained EXACTLY self-consistent at either value (0.000% relative
-    difference between jax.jvp and finite-difference at both dz=15mm and
-    dz=60mm). Compile time is essentially unaffected by dz (jax.lax.scan
-    compiles one step body regardless of how many times it iterates) --
-    the win is purely in runtime, which is what dominates repeated
-    gradient/ensemble evaluations. Also re-verified against the SPECIFIC
-    unstable particle that motivated ``aperture_radius`` below (see
+    ``dz`` (default 15mm -- see the IMPORTANT CORRECTION below before
+    considering 60mm again): retuned once already after measuring a
+    tradeoff directly, not by guessing, then partially reverted after that
+    retuning turned out not to generalize. On a stable single-particle
+    trajectory (1 lattice period), 60mm was ~2.3x faster (2.1s -> 0.9s
+    post-compile) with a ~0.25 MeV (~0.08%) difference in final energy, and
+    forward-/reverse-mode AD remained EXACTLY self-consistent at either
+    value (0.000% relative difference between jax.jvp and finite-difference
+    at both dz=15mm and dz=60mm). Compile time is essentially unaffected by
+    dz (jax.lax.scan compiles one step body regardless of how many times it
+    iterates) -- the (real, at small scale) win is purely in runtime, which
+    is what dominates repeated gradient/ensemble evaluations. Also
+    re-verified at the time against the SPECIFIC unstable particle that
+    motivated ``aperture_radius`` below (see
     docs/SESSION_HANDOFF_2026-08-17_aperture_cut.md): the freeze still
-    triggers correctly and produces a sane result at dz=60mm, just with a
+    triggered correctly and produced a sane result at dz=60mm, just with a
     slightly larger one-step overshoot past the aperture threshold (~9mm vs
     ~1mm at dz=15mm) -- nowhere near the catastrophic failure mode that
     document found from loosening *tolerance* instead (100+ km off-axis,
     negative energy). Do NOT use a large dz as a substitute for the
     aperture cut, and do not loosen rtol/atol to work around an unstable
     trajectory -- both of those were already tried and rejected for good
-    reasons documented there; dz is a genuinely different, safe knob only
-    because the aperture freeze re-checks every step regardless of its size.
+    reasons documented there.
 
-    IMPORTANT CORRECTION, found the hard way: all of the above verification
-    was against ONE particle over ONE period near the channel start -- NOT
-    against a full multi-period, larger-ensemble run. When scripts/
-    optimize_taper.py (multi-period, N=24 ensemble) was actually run at
-    dz=60mm across 5 periods, it hit "the maximum number of solver steps was
-    reached" -- a real failure, not a theoretical risk. Reverting to dz=15mm
-    fixed it cleanly. Root cause not fully isolated (plausibly: a *different*
-    particle than the one originally tested becomes marginal partway through
-    a longer run, and the larger per-step aperture overshoot at dz=60mm is
-    enough to push it into a harder-to-resolve regime before the freeze
-    catches it) -- but the practical conclusion is firm regardless of the
-    exact mechanism: dz=60mm's safety verification does NOT generalize to
-    multi-period/larger-ensemble runs, and scripts/optimize_taper.py has
-    reverted its own default to 15mm accordingly. The other scripts using
-    this function (track_full_channel.py, gradient_check.py,
-    emittance_sandbox.py, optimize_lattice.py) still default to 60mm and have
-    NOT been re-tested at a comparably large multi-period ensemble scale --
-    treat that as an open risk for them too, not a cleared one, until
-    someone actually runs that test rather than assuming the single-particle
-    verification above still applies.
+    IMPORTANT CORRECTION, found the hard way: all of the dz=60mm
+    verification above was against ONE particle over ONE period near the
+    channel start -- NOT against a full multi-period, larger-ensemble run.
+    When scripts/optimize_taper.py (multi-period, N=24 ensemble) was
+    actually run at dz=60mm across 5 periods, it hit "the maximum number of
+    solver steps was reached" -- a real failure, not a theoretical risk.
+    Reverting to dz=15mm fixed it cleanly. Root cause not fully isolated
+    (plausibly: a *different* particle than the one originally tested
+    becomes marginal partway through a longer run, and the larger per-step
+    aperture overshoot at dz=60mm is enough to push it into a
+    harder-to-resolve regime before the freeze catches it) -- but the
+    practical conclusion is firm regardless of the exact mechanism:
+    dz=60mm's safety verification does NOT generalize to multi-period/
+    larger-ensemble runs. This function's own default, and every script
+    that calls it (track_full_channel.py, gradient_check.py,
+    emittance_sandbox.py, optimize_lattice.py, track_ensemble.py,
+    optimize_taper.py), have all been reverted to dz=15mm accordingly --
+    checked directly, not assumed (see the commit that made this change for
+    the grep confirming every caller's own DZ constant, not just this
+    function's default). track_full_channel.py's full 31-period single-
+    reference-particle validation against the real G4BL trace (the
+    project's headline fidelity result, ~7.9 MeV energy RMS) has been
+    rerun at the corrected dz=15mm and CONFIRMED (not assumed) to
+    reproduce essentially identically: RMS energy diff 7.88 MeV vs. the
+    previously reported 7.9 MeV, RMS radius diff 9.60mm vs. 9.6mm, final
+    energy 246.2 vs. G4BL's 245.5 MeV. That specific result was never
+    actually wrong -- but this had genuinely not been checked prior to
+    this revert, and the general caution below (don't assume 60mm is safe
+    at scale without testing) still stands for anything not specifically
+    reconfirmed this way. Treat 60mm
+    as unsafe at any multi-period or N>1 scale until proven otherwise by an
+    actual test at that scale, not by extrapolating from a single-particle/
+    single-period check.
 
     ``window_z``/``window_thick`` come from ``cavity_window_positions`` --
     pass both together, or neither (skips Be windows). ``rfc0_centers`` comes

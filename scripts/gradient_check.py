@@ -41,7 +41,13 @@ from hfofo.union_material import build_union_material
 DATA = "data/hfofo.yaml"
 N_ENSEMBLE = 8
 BEAM_START = -700.0 * u.mm
-DZ = 60.0 * u.mm  # retuned from 15mm -- see track_with_drag docstring for the measured tradeoff
+DZ = 15.0 * u.mm  # REVERTED from 60mm -- see optimize_taper.py's d73df4b for why: a real,
+           # reproduced failure ("max_steps was reached") at multi-period,
+           # N>=24 scale that the original 60mm retuning was never tested
+           # against (only verified for one particle over one period). This
+           # script had not been re-tested at that scale either -- reverted
+           # here as a precaution, not because THIS script was independently
+           # confirmed to fail, matching the same reasoning.
 
 
 def main() -> None:

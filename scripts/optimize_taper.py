@@ -442,12 +442,22 @@ def optimize(merit, nominal_theta, n_steps=3, lr=0.1, checkpoint_path=None, valu
     """See optimize_lattice.py's function of the same name -- identical
     resumable-checkpoint pattern, generalized to however many taper
     coefficients ``nominal_theta`` has (not hardcoded to K_PARAMS=3).
+
+    Writes the checkpoint after EVERY step, not once after the whole loop
+    (a real bug, found the hard way: a run requesting several steps that
+    crashed on the LAST one -- e.g. hitting max_steps from the dz=60mm
+    issue documented in track_with_drag's docstring -- silently discarded
+    every successfully-completed earlier step from that invocation, since
+    nothing had been written to disk yet when the exception propagated out
+    of the loop).
     """
     n_params = len(nominal_theta)
     print(f"\noptimizing {n_params} taper coefficient(s) for {n_steps} more step(s) (Adam, lr={lr})...")
     theta = nominal_theta
+    prior = []
     if checkpoint_path is not None and os.path.exists(checkpoint_path):
         saved = np.loadtxt(checkpoint_path, ndmin=2)
+        prior = saved.tolist()
         theta = jnp.array(saved[-1, :n_params])
         print(f"resuming from checkpoint: {len(saved)} step(s) already done, "
               f"last merit={saved[-1, n_params]:.4f}")
@@ -459,21 +469,18 @@ def optimize(merit, nominal_theta, n_steps=3, lr=0.1, checkpoint_path=None, valu
     opt_state = optimizer.init(theta)
     grad_and_val = jax.jit(value_and_grad_fn)
 
-    rows = []
     for step in range(n_steps):
         t0 = time.time()
         val, grad = grad_and_val(theta)
         updates, opt_state = optimizer.update(grad, opt_state)
         theta = optax.apply_updates(theta, updates)
-        rows.append([*theta.tolist(), float(val)])
+        prior.append([*theta.tolist(), float(val)])
         print(f"  step {step}: merit={float(val):.4f}  theta={theta}  ({time.time() - t0:.1f}s)")
+        if checkpoint_path is not None:
+            np.savetxt(checkpoint_path, np.array(prior))
 
     if checkpoint_path is not None:
-        prior = []
-        if os.path.exists(checkpoint_path):
-            prior = np.loadtxt(checkpoint_path, ndmin=2).tolist()
-        np.savetxt(checkpoint_path, np.array(prior + rows))
-        print(f"wrote {checkpoint_path} ({len(prior) + len(rows)} step(s) total)")
+        print(f"wrote {checkpoint_path} ({len(prior)} step(s) total)")
 
     return theta
 
