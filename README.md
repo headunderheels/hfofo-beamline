@@ -1,7 +1,7 @@
 # hfofo-beamline
 
 An **application** of the [`beamline`](https://github.com/headunderheels/beamline)
-differentiable muon-beamline simulator: it reconstructs the frozen HFOFO snake
+differentiable beamline simulator: it reconstructs the frozen HFOFO snake
 cooling channel (31 periods of alternating-sign solenoids, 325 MHz pillbox RF,
 and LiH wedge absorbers) from extracted lattice data and assembles it into
 `beamline` field/material objects for tracking.
