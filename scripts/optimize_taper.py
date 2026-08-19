@@ -82,7 +82,24 @@ from emittance_sandbox import APERTURE_RADIUS, load_sample, make_ensemble_state
 
 DATA = "data/hfofo.yaml"
 BEAM_START = -700.0 * u.mm
-DZ = 60.0 * u.mm  # see hfofo.background.track_with_drag's docstring
+DZ = 15.0 * u.mm  # REVERTED from 60mm after a real failure -- see below
+# The performance patch that retuned DZ project-wide to 60mm verified safety
+# against exactly one known-unstable particle over one period near the
+# channel start (see hfofo.background.track_with_drag's docstring). It was
+# NOT tested against a full multi-period, N=24+ ensemble -- and when
+# actually run at --n-periods 5 --n-ensemble 24, it hit "the maximum number
+# of solver steps was reached". Reverting to --dz 15 (the pre-retuning
+# value) fixed it cleanly: the jacfwd-vs-finite-difference check completed
+# with a normal 0.07% match, right at the point the dz=60mm run crashed.
+# This is real, direct evidence -- not a theoretical concern -- that dz=60mm
+# is unsafe at the ensemble/period scale this script is actually meant to be
+# used at. Use --dz 60 explicitly if you've separately verified it's safe
+# for your specific n_periods/n_ensemble; don't assume it from the
+# single-particle verification alone. The other scripts in this project
+# (track_full_channel.py, gradient_check.py, emittance_sandbox.py,
+# optimize_lattice.py) still default to 60mm and have NOT been re-tested at
+# a comparably large multi-period ensemble scale -- this same risk likely
+# applies to them too if pushed to a similar scale, not yet confirmed either way.
 N_ENSEMBLE = 6
 
 # Steady-state (taper-eligible) region: excludes the entrance matching
@@ -463,10 +480,29 @@ def optimize(merit, nominal_theta, n_steps=3, lr=0.1, checkpoint_path=None, valu
 
 def track_with_diagnostics(lattice, theta, n_periods: int, n_ensemble: int, sample=None, dz: float | None = None):
     """Track n_periods periods, recording per-period survivor fraction and
-    eigen-emittance product -- the trajectory data the diagnostic plots need,
-    not just the final merit. Returns (per_period_survival, per_period_eps_product,
-    final_state). Separated from build_pipeline's merit() because plotting
-    needs the intermediate history, not just the final scalar.
+    eigen-emittances -- the trajectory data the diagnostic plots need, not
+    just the final merit. Returns (per_period_survival, per_period_eps_product,
+    per_period_eps_individual, final_state), where per_period_eps_individual
+    is a list of (eps1, eps2, eps3) tuples (NaN-filled below the rank-7
+    floor). Separated from build_pipeline's merit() because plotting needs
+    the intermediate history, not just the final scalar.
+
+    NOTE on eps1/eps2/eps3 identity: eigen_emittances_6d sorts by VALUE
+    (eps1 >= eps2 >= eps3), not by physical mode identity. The reference
+    paper (Alexahin 2018, Table 1) tracks 3 SPECIFIC physical modes (two
+    transverse normal modes + one longitudinal) consistently period to
+    period via a continuous optics calculation -- our eps1/2/3 have no such
+    guarantee, and if two modes' emittances ever cross in value between
+    periods, which slot ("eps1" vs "eps2") represents which physical mode
+    would swap, which could look like a discontinuity that isn't physically
+    real. In practice, for this channel's actual sampled beam, the
+    longitudinal spread (driven by the raw ct/E scale) is consistently far
+    larger than either transverse mode's, so eps1 is very likely always the
+    longitudinal-dominated mode in practice -- but this has NOT been proven
+    to hold at every period/parameter value tested, so panels using this
+    breakdown are labeled by "largest/middle/smallest", not by physical
+    identity, and this caveat should stay attached to that labeling rather
+    than being quietly dropped.
 
     ``dz``: see build_pipeline's docstring -- kept consistent here since
     plot_diagnostics calls this directly, not through build_pipeline.
@@ -487,6 +523,7 @@ def track_with_diagnostics(lattice, theta, n_periods: int, n_ensemble: int, samp
 
     survival_history = []
     eps_product_history = []
+    eps_individual_history = []
     for period_idx in range(n_periods):
         channel = build_period_channel(lattice, period_idx, theta)
         z_center = BEAM_START + (period_idx + 0.5) * period
@@ -513,40 +550,71 @@ def track_with_diagnostics(lattice, theta, n_periods: int, n_ensemble: int, samp
         n_survivors = int(jnp.sum(weights))
         if n_survivors >= 7:  # 6D covariance rank floor -- see build_pipeline's docstring
             cov = weighted_covariance6(p.x, t.x, p.y, t.y, p.ct, t.ct, weights)
-            eps_product = float(jnp.prod(eigen_emittances_6d(cov)))
+            eps = eigen_emittances_6d(cov)
+            eps_product = float(jnp.prod(eps))
+            eps_individual = tuple(float(e) for e in eps)
         else:
             eps_product = float("nan")  # rank-deficient -- not a meaningful number, don't plot as if it were
+            eps_individual = (float("nan"), float("nan"), float("nan"))
         survival_history.append(survival)
         eps_product_history.append(eps_product)
-        print(f"  period {period_idx}: survival={survival:.3f} ({n_survivors} alive)  "
-              f"eps_product={eps_product:.4e}" if n_survivors >= 7 else
-              f"  period {period_idx}: survival={survival:.3f} ({n_survivors} alive)  "
-              f"eps_product=N/A (below rank-7 floor)")
+        eps_individual_history.append(eps_individual)
+        eps_str = f"eps={eps_individual[0]:.3e}/{eps_individual[1]:.3e}/{eps_individual[2]:.3e}" if n_survivors >= 7 else "eps=N/A (below rank-7 floor)"
+        print(f"  period {period_idx}: survival={survival:.3f} ({n_survivors} alive)  {eps_str}")
 
-    return survival_history, eps_product_history, state
+    return survival_history, eps_product_history, eps_individual_history, state
 
 
 def plot_diagnostics(
     lattice, nominal_theta, final_theta, n_periods: int, n_ensemble: int,
     checkpoint_rows=None, outdir: str = "artifacts", dz: float | None = None,
 ):
-    """Four-panel diagnostic figure, generated as a normal part of running
+    """Six-panel diagnostic figure, generated as a normal part of running
     this script (not an afterthought) -- per project convention, plots like
     this are what make judgement calls about optimizer behavior possible;
     several real findings this session (the aperture-loss trend, the
     rank-deficiency floor) would have been visible immediately here rather
     than needing separate ad hoc debugging.
 
+    Benchmarked against Alexahin 2018 (JINST 13 P08013), the actual HFOFO
+    design paper this channel is built from: initial/final 6D emittance
+    ratio 112.8 (36.4 transverse, 3.1 longitudinal) at ~65% transmission
+    over the real 124m (~30-period) channel. Two different ways these get
+    used here, deliberately:
+    - Transmission (panel 4): the 65% line is drawn directly on the partial
+      run, because transmission only ever decreases along the channel --
+      if you're already below 65% within the first few periods (out of
+      ~30), you're guaranteed to finish below it too. This is exactly the
+      "something to check" signal it's meant to be.
+    - 6D cooling ratio (panel 5): NOT drawn as a flat 112.8 line, because
+      that's a FULL ~30-period target and cooling compounds multiplicatively
+      -- expecting anywhere near it after only n_periods periods would be
+      misleading. Instead annotated with the equivalent per-period rate
+      (112.8^(1/30), assuming uniform compounding -- a real simplification,
+      the true design almost certainly doesn't cool at a perfectly uniform
+      per-period rate, but it's a far more honest reference point for a
+      partial run than the full-channel number would be on its own).
+
     Panel 1: taper profile -- nominal (deck-fit) vs final (optimized) current
       magnitude vs period index, with the real deck data points overlaid so
       it's visible whether the optimizer found something that still looks
       like a physically sensible taper or something wild.
     Panel 2: merit vs optimizer step, from the checkpoint file.
-    Panel 3: per-period survival fraction, nominal vs final -- directly
-      shows whether an optimized taper is winning by cooling or by losing
-      more/fewer particles (the diagnose_optimizer.py-style concern).
-    Panel 4: per-period eigen-emittance product, nominal vs final (points
-      below the rank-7 floor omitted, not plotted as zero/misleading).
+    Panel 3: reference benchmark text (this project's own convention, not
+      from the paper) -- the Alexahin 2018 numbers restated here so they're
+      visible alongside the plot rather than requiring the paper open
+      separately.
+    Panel 4: per-period survival fraction, nominal vs final, with the 65%
+      full-channel target -- directly shows whether an optimized taper is
+      winning by cooling or by losing more/fewer particles (the
+      diagnose_optimizer.py-style concern).
+    Panel 5: 6D cooling ratio (eps_product[0]/eps_product[period]) per
+      period, nominal vs final -- see the compounding note above for why
+      this is a ratio, not the raw absolute eigen-emittance product.
+    Panel 6: individual eigen-emittances (largest/middle/smallest -- NOT
+      guaranteed physical mode identity, see track_with_diagnostics's
+      docstring for why), nominal vs final, mirroring the paper's Figure 6
+      style (3 mode curves per beam).
     """
     try:
         import matplotlib
@@ -569,11 +637,12 @@ def plot_diagnostics(
     final_curve = np.array([float(taper_magnitude(nn, final_theta)) for nn in n_norm_curve])
 
     print("tracking at nominal_theta for diagnostics...")
-    surv_nom, eps_nom, _ = track_with_diagnostics(lattice, nominal_theta, n_periods, n_ensemble, dz=dz)
+    surv_nom, eps_nom, eps_ind_nom, _ = track_with_diagnostics(lattice, nominal_theta, n_periods, n_ensemble, dz=dz)
     print("tracking at final_theta for diagnostics...")
-    surv_fin, eps_fin, _ = track_with_diagnostics(lattice, final_theta, n_periods, n_ensemble, dz=dz)
+    surv_fin, eps_fin, eps_ind_fin, _ = track_with_diagnostics(lattice, final_theta, n_periods, n_ensemble, dz=dz)
 
-    fig, axs = plt.subplots(2, 2, figsize=(12, 9))
+    fig, axs = plt.subplots(2, 3, figsize=(17, 9))
+    periods_x = list(range(n_periods))
 
     ax = axs[0, 0]
     ax.scatter(n_idx_real, mag_real, s=8, alpha=0.4, color="gray", label="real deck currents")
@@ -595,24 +664,59 @@ def plot_diagnostics(
         ax.text(0.5, 0.5, "no checkpoint history", ha="center", va="center")
         ax.set_title("Optimization convergence (no data)")
 
+    ax = axs[0, 2]
+    ax.axis("off")
+    per_period_rate = 112.8 ** (1.0 / 30.0)
+    benchmark_text = (
+        "Reference: Alexahin 2018\n(JINST 13 P08013)\n\n"
+        "Real HFOFO design, ~30 periods (124m):\n"
+        "  6D emittance ratio: 112.8x\n"
+        "    transverse (4D): 36.4x\n"
+        "    longitudinal:     3.1x\n"
+        "  transmission: ~65%\n\n"
+        f"Equivalent uniform per-period\n6D cooling rate: {per_period_rate:.3f}x/period\n"
+        "(assumes constant rate -- a real\nsimplification, not from the paper)"
+    )
+    ax.text(0.05, 0.95, benchmark_text, transform=ax.transAxes, va="top", ha="left",
+            fontsize=10, family="monospace")
+
     ax = axs[1, 0]
-    periods_x = list(range(n_periods))
     ax.plot(periods_x, surv_nom, marker="o", label="nominal", color="C0")
     ax.plot(periods_x, surv_fin, marker="o", label="final", color="C3")
-    ax.axhline(7 / n_ensemble, color="gray", linestyle="--", linewidth=1, label="rank-7 floor (this N)")
+    ax.axhline(0.65, color="k", linestyle="--", linewidth=1.2, label="paper target: 65% (full channel)")
+    ax.axhline(7 / n_ensemble, color="gray", linestyle=":", linewidth=1, label="rank-7 floor (this N)")
     ax.set_xlabel("period")
     ax.set_ylabel("survival fraction")
     ax.set_title(f"Transmission per period (N={n_ensemble})")
-    ax.legend()
+    ax.legend(fontsize=8)
 
     ax = axs[1, 1]
-    ax.plot(periods_x, eps_nom, marker="o", label="nominal", color="C0")
-    ax.plot(periods_x, eps_fin, marker="o", label="final", color="C3")
+    eps0_nom = eps_nom[0] if eps_nom and eps_nom[0] == eps_nom[0] else float("nan")  # NaN-safe first value
+    eps0_fin = eps_fin[0] if eps_fin and eps_fin[0] == eps_fin[0] else float("nan")
+    ratio_nom = [eps0_nom / e if e == e and e != 0 else float("nan") for e in eps_nom]
+    ratio_fin = [eps0_fin / e if e == e and e != 0 else float("nan") for e in eps_fin]
+    ax.plot(periods_x, ratio_nom, marker="o", label="nominal", color="C0")
+    ax.plot(periods_x, ratio_fin, marker="o", label="final", color="C3")
+    ax.set_xlabel("period")
+    ax.set_ylabel("eps_product[0] / eps_product[period]")
+    ax.set_title("6D cooling ratio so far\n(NOT directly comparable to the full 112.8x target -- see docstring)")
+    ax.legend()
+
+    ax = axs[1, 2]
+    labels = ["largest", "middle", "smallest"]
+    colors = ["C4", "C5", "C6"]
+    for mode_idx in range(3):
+        nom_vals = [row[mode_idx] for row in eps_ind_nom]
+        fin_vals = [row[mode_idx] for row in eps_ind_fin]
+        ax.plot(periods_x, nom_vals, color=colors[mode_idx], linestyle="-", marker="o",
+                 label=f"{labels[mode_idx]} (nominal)")
+        ax.plot(periods_x, fin_vals, color=colors[mode_idx], linestyle="--", marker="s",
+                 label=f"{labels[mode_idx]} (final)")
     ax.set_yscale("log")
     ax.set_xlabel("period")
-    ax.set_ylabel("eigen-emittance product (log scale)")
-    ax.set_title("6D phase-space volume per period\n(gaps = below rank-7 floor, not plotted)")
-    ax.legend()
+    ax.set_ylabel("eigen-emittance (log scale)")
+    ax.set_title("Individual eigen-emittances\n(largest/middle/smallest by VALUE, not physical mode identity)")
+    ax.legend(fontsize=7)
 
     fig.tight_layout()
     os.makedirs(outdir, exist_ok=True)

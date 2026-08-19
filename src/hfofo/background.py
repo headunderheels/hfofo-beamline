@@ -367,11 +367,12 @@ def track_with_drag(
     history / the module-level notes); a small-step deterministic loop sidesteps
     that entirely.
 
-    ``dz`` (default 60mm, was 15mm): retuned after measuring the tradeoff
-    directly, not by guessing. On a stable single-particle trajectory (1
-    lattice period): ~2.3x faster (2.1s -> 0.9s post-compile) with a ~0.25 MeV
-    (~0.08%) difference in final energy, and forward-/reverse-mode AD
-    remained EXACTLY self-consistent at either value (0.000% relative
+    ``dz`` (default 60mm here, though the default in scripts/optimize_taper.py
+    has since been reverted to 15mm -- see below): retuned after measuring the
+    tradeoff directly, not by guessing. On a stable single-particle trajectory
+    (1 lattice period): ~2.3x faster (2.1s -> 0.9s post-compile) with a
+    ~0.25 MeV (~0.08%) difference in final energy, and forward-/reverse-mode
+    AD remained EXACTLY self-consistent at either value (0.000% relative
     difference between jax.jvp and finite-difference at both dz=15mm and
     dz=60mm). Compile time is essentially unaffected by dz (jax.lax.scan
     compiles one step body regardless of how many times it iterates) --
@@ -388,6 +389,27 @@ def track_with_drag(
     trajectory -- both of those were already tried and rejected for good
     reasons documented there; dz is a genuinely different, safe knob only
     because the aperture freeze re-checks every step regardless of its size.
+
+    IMPORTANT CORRECTION, found the hard way: all of the above verification
+    was against ONE particle over ONE period near the channel start -- NOT
+    against a full multi-period, larger-ensemble run. When scripts/
+    optimize_taper.py (multi-period, N=24 ensemble) was actually run at
+    dz=60mm across 5 periods, it hit "the maximum number of solver steps was
+    reached" -- a real failure, not a theoretical risk. Reverting to dz=15mm
+    fixed it cleanly. Root cause not fully isolated (plausibly: a *different*
+    particle than the one originally tested becomes marginal partway through
+    a longer run, and the larger per-step aperture overshoot at dz=60mm is
+    enough to push it into a harder-to-resolve regime before the freeze
+    catches it) -- but the practical conclusion is firm regardless of the
+    exact mechanism: dz=60mm's safety verification does NOT generalize to
+    multi-period/larger-ensemble runs, and scripts/optimize_taper.py has
+    reverted its own default to 15mm accordingly. The other scripts using
+    this function (track_full_channel.py, gradient_check.py,
+    emittance_sandbox.py, optimize_lattice.py) still default to 60mm and have
+    NOT been re-tested at a comparably large multi-period ensemble scale --
+    treat that as an open risk for them too, not a cleared one, until
+    someone actually runs that test rather than assuming the single-particle
+    verification above still applies.
 
     ``window_z``/``window_thick`` come from ``cavity_window_positions`` --
     pass both together, or neither (skips Be windows). ``rfc0_centers`` comes
