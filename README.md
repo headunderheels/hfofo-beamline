@@ -6,8 +6,6 @@ cooling channel (31 periods of alternating-sign solenoids, 325 MHz pillbox RF,
 and LiH wedge absorbers) from extracted lattice data and assembles it into
 `beamline` field/material objects for tracking.
 
-`beamline` is the general library; this repo is one concrete channel built on it.
-
 ## Layout
 
 ```
