@@ -178,6 +178,7 @@ def build_pipeline(
     taper_degree: int = 2,
     forward_mode: bool = True,
     transmission_power: float = 1.0,
+    dz: float | None = None,
 ):
     """Multi-period taper-parameterized pipeline. Returns (merit, nominal_theta).
 
@@ -214,7 +215,23 @@ def build_pipeline(
     trading transmission for a tighter surviving core (see the
     diagnose_optimizer.py-style concern this was built to address);
     power=1 is a reasonable starting point, not empirically tuned yet.
+
+    ``dz``: overrides the module-level DZ (60mm). ADDED AFTER A REAL FAILURE:
+    dz=60mm was verified safe against exactly one known-unstable particle
+    over exactly one period near the channel start (see
+    hfofo.background.track_with_drag's docstring) -- NOT against a full
+    multi-period, N=24+ run, where a *different* particle can become
+    marginal partway through and hit a much larger aperture overshoot at
+    the coarser step size before the freeze catches it. A real run at
+    --n-periods 5 --n-ensemble 24 hit exactly this ("maximum number of
+    solver steps was reached") where the same command had not been tested
+    at this scale before. If you hit this: try --dz 15 first (cheap, direct
+    test of whether the retuned default is the actual cause) before
+    assuming a deeper bug -- and please report back either way, since this
+    determines whether dz=60mm needs to be walked back as the default.
     """
+    if dz is None:
+        dz = DZ
     lattice = load_lattice(DATA)
     period = lattice.meta.period
     nominal_theta = fit_nominal_taper(lattice, degree=taper_degree)
@@ -238,11 +255,11 @@ def build_pipeline(
             )
             z0 = BEAM_START + period_idx * period
             z1 = z0 + period
-            n_steps = int(round(float(period / DZ)))
+            n_steps = int(round(float(period / dz)))
 
             def track_one(s):
                 fs, _ = track_with_drag(
-                    channel, s, z0, z1, dz=DZ, include_presswall=True,
+                    channel, s, z0, z1, dz=dz, include_presswall=True,
                     wedges=wedges, window_z=window_z, window_thick=window_thick,
                     rfc0_centers=rfc0_centers, n_steps=n_steps, key=None,
                     rtol=1e-3, atol=1e-5, aperture_radius=APERTURE_RADIUS,
@@ -293,6 +310,89 @@ def value_and_grad_rev(f):
     assume the theoretical direction holds without looking.
     """
     return jax.value_and_grad(f)
+
+
+def _verify_one_mode_worker(forward_mode: bool, pipeline_kwargs: dict, nominal_theta_list: list):
+    """Top-level (picklable) worker for verify_grad_consistency_parallel's
+    spawned subprocess -- must be a module-level function, not a closure or
+    lambda, since 'spawn' re-imports this module in the child process and
+    calls the function by reference rather than pickling a live object.
+
+    Independently rebuilds the pipeline rather than receiving any JAX object
+    across the process boundary -- JAX closures/compiled functions are not
+    reliably picklable, and rebuilding from scratch in each process is also
+    exactly what makes running this under 'spawn' safe (see the caller's
+    docstring for why 'spawn', not the platform default 'fork', matters here).
+    """
+    import time
+
+    import jax
+    import jax.numpy as jnp
+
+    from optimize_taper import build_pipeline
+
+    nominal_theta = jnp.array(nominal_theta_list)
+    merit, _ = build_pipeline(forward_mode=forward_mode, **pipeline_kwargs)
+    t0 = time.time()
+    grad = jax.jacfwd(merit)(nominal_theta) if forward_mode else jax.grad(merit)(nominal_theta)
+    elapsed = time.time() - t0
+    return forward_mode, [float(g) for g in grad], elapsed
+
+
+def verify_grad_consistency_parallel(nominal_theta, **pipeline_kwargs):
+    """Same check as verify_grad_consistency, but runs the forward- and
+    reverse-mode gradient computations as two INDEPENDENT OS processes
+    concurrently instead of sequentially -- they don't depend on each other
+    at all (each rebuilds its own pipeline and computes its own gradient
+    from scratch), so on a multi-core machine wall-clock time should drop to
+    roughly the slower of the two rather than their sum. Measured
+    sequentially in a real N=24, K=3 run: ~388s (forward) + ~498s (reverse)
+    = ~886s; this should complete in roughly the ~498s of just the slower
+    side, given at least 2 free cores.
+
+    IMPORTANT -- uses multiprocessing's 'spawn' start method explicitly, NOT
+    the platform default ('fork' on Linux). Forking a process that has
+    already imported/initialized JAX is a well-documented hazard: XLA's
+    runtime, thread pools, and device state generally do not survive fork()
+    safely (can deadlock or silently corrupt results). 'spawn' creates a
+    genuinely fresh Python process that re-imports everything cleanly,
+    avoiding this entirely, at the cost of some per-worker startup overhead
+    (each process re-imports jax/beamline/hfofo from scratch, on top of its
+    own compile) -- worth it for correctness over the fork() shortcut.
+
+    LIMITATION: verified only for CORRECTNESS (matches
+    verify_grad_consistency's sequential result exactly), not for the
+    speedup this is meant to provide -- the environment this was built and
+    tested in has exactly 1 CPU core (confirmed via nproc/jax.local_device_count()
+    both reporting 1), so two concurrent processes have no second core to
+    actually run on there. Check wall-clock on your real multi-core machine
+    before assuming the speedup materializes; don't assume it from this
+    docstring alone.
+    """
+    import multiprocessing as mp
+
+    ctx = mp.get_context("spawn")
+    theta_list = nominal_theta.tolist() if hasattr(nominal_theta, "tolist") else list(nominal_theta)
+
+    with ctx.Pool(processes=2) as pool:
+        results = pool.starmap(
+            _verify_one_mode_worker,
+            [(True, pipeline_kwargs, theta_list), (False, pipeline_kwargs, theta_list)],
+        )
+
+    by_mode = {fwd: (jnp.array(g), t) for fwd, g, t in results}
+    grad_fwd, t_fwd = by_mode[True]
+    grad_rev, t_rev = by_mode[False]
+
+    print(f"forward-mode (jax.jacfwd, ForwardMode adjoint): grad={grad_fwd}  ({t_fwd:.1f}s)")
+    print(f"reverse-mode (jax.grad, RecursiveCheckpointAdjoint): grad={grad_rev}  ({t_rev:.1f}s)")
+    rel_err = float(jnp.max(jnp.abs(grad_fwd - grad_rev) / jnp.abs(grad_fwd))) * 100
+    print(f"max relative difference: {rel_err:.4f}%")
+    print(
+        f"wall-clock: ran concurrently -- max({t_fwd:.1f}s, {t_rev:.1f}s) on a machine with >=2 "
+        f"free cores, rather than the ~{t_fwd + t_rev:.1f}s the sequential version would take"
+    )
+    return grad_fwd, grad_rev
 
 
 def verify_grad_consistency(nominal_theta, **pipeline_kwargs):
@@ -361,12 +461,15 @@ def optimize(merit, nominal_theta, n_steps=3, lr=0.1, checkpoint_path=None, valu
     return theta
 
 
-def track_with_diagnostics(lattice, theta, n_periods: int, n_ensemble: int, sample=None):
+def track_with_diagnostics(lattice, theta, n_periods: int, n_ensemble: int, sample=None, dz: float | None = None):
     """Track n_periods periods, recording per-period survivor fraction and
     eigen-emittance product -- the trajectory data the diagnostic plots need,
     not just the final merit. Returns (per_period_survival, per_period_eps_product,
     final_state). Separated from build_pipeline's merit() because plotting
     needs the intermediate history, not just the final scalar.
+
+    ``dz``: see build_pipeline's docstring -- kept consistent here since
+    plot_diagnostics calls this directly, not through build_pipeline.
     """
     from emittance_sandbox import APERTURE_RADIUS, load_sample, make_ensemble_state
     from hfofo.background import cavity_window_positions_windowed, rfc0_interior_centers
@@ -374,6 +477,8 @@ def track_with_diagnostics(lattice, theta, n_periods: int, n_ensemble: int, samp
     from hfofo.build import build_wedges_windowed
     from hfofo.emittance import eigen_emittances_6d, weighted_covariance6
 
+    if dz is None:
+        dz = DZ
     if sample is None:
         sample = load_sample(size=n_ensemble)
     state = make_ensemble_state(sample)
@@ -389,11 +494,11 @@ def track_with_diagnostics(lattice, theta, n_periods: int, n_ensemble: int, samp
         window_z, window_thick = cavity_window_positions_windowed(lattice.cavities, z_center=z_center)
         z0 = BEAM_START + period_idx * period
         z1 = z0 + period
-        n_steps = int(round(float(period / DZ)))
+        n_steps = int(round(float(period / dz)))
 
         def track_one(s):
             fs, _ = track_with_drag(
-                channel, s, z0, z1, dz=DZ, include_presswall=True,
+                channel, s, z0, z1, dz=dz, include_presswall=True,
                 wedges=wedges, window_z=window_z, window_thick=window_thick,
                 rfc0_centers=rfc0_centers, n_steps=n_steps, key=None,
                 rtol=1e-3, atol=1e-5, aperture_radius=APERTURE_RADIUS,
@@ -423,7 +528,7 @@ def track_with_diagnostics(lattice, theta, n_periods: int, n_ensemble: int, samp
 
 def plot_diagnostics(
     lattice, nominal_theta, final_theta, n_periods: int, n_ensemble: int,
-    checkpoint_rows=None, outdir: str = "artifacts",
+    checkpoint_rows=None, outdir: str = "artifacts", dz: float | None = None,
 ):
     """Four-panel diagnostic figure, generated as a normal part of running
     this script (not an afterthought) -- per project convention, plots like
@@ -464,9 +569,9 @@ def plot_diagnostics(
     final_curve = np.array([float(taper_magnitude(nn, final_theta)) for nn in n_norm_curve])
 
     print("tracking at nominal_theta for diagnostics...")
-    surv_nom, eps_nom, _ = track_with_diagnostics(lattice, nominal_theta, n_periods, n_ensemble)
+    surv_nom, eps_nom, _ = track_with_diagnostics(lattice, nominal_theta, n_periods, n_ensemble, dz=dz)
     print("tracking at final_theta for diagnostics...")
-    surv_fin, eps_fin, _ = track_with_diagnostics(lattice, final_theta, n_periods, n_ensemble)
+    surv_fin, eps_fin, _ = track_with_diagnostics(lattice, final_theta, n_periods, n_ensemble, dz=dz)
 
     fig, axs = plt.subplots(2, 2, figsize=(12, 9))
 
@@ -526,12 +631,29 @@ def main() -> None:
     ap.add_argument("--n-ensemble", type=int, default=N_ENSEMBLE)
     ap.add_argument("--taper-degree", type=int, default=2)
     ap.add_argument("--transmission-power", type=float, default=1.0)
+    ap.add_argument(
+        "--dz", type=float, default=None,
+        help="mm, overrides the module default (60mm). ADDED AFTER A REAL "
+             "FAILURE: dz=60mm was only verified against one known-unstable "
+             "particle over one period near the channel start, not a full "
+             "multi-period/N=24+ run -- if you hit 'maximum number of solver "
+             "steps was reached' at a scale not tested before, try --dz 15 "
+             "first to check whether the retuned default is the cause",
+    )
     ap.add_argument("--steps", type=int, default=3)
     ap.add_argument("--lr", type=float, default=0.1)
     ap.add_argument("--checkpoint", default="artifacts/optimize_taper_checkpoint.txt")
     ap.add_argument("--skip-jacfwd-check", action="store_true")
     ap.add_argument("--reverse-mode", action="store_true")
     ap.add_argument("--verify-consistency", action="store_true")
+    ap.add_argument(
+        "--parallel", action="store_true",
+        help="with --verify-consistency, run the forward- and reverse-mode "
+             "checks as two concurrent OS processes (multiprocessing, "
+             "'spawn' start method) instead of sequentially -- see "
+             "verify_grad_consistency_parallel's docstring; needs >=2 free "
+             "CPU cores to actually help, has no effect without --verify-consistency",
+    )
     ap.add_argument(
         "--plot", action="store_true",
         help="generate artifacts/optimize_taper_diagnostics.png (taper profile, "
@@ -547,12 +669,16 @@ def main() -> None:
         n_ensemble=args.n_ensemble,
         taper_degree=args.taper_degree,
         transmission_power=args.transmission_power,
+        dz=args.dz * u.mm if args.dz is not None else None,
     )
     merit, nominal_theta = build_pipeline(forward_mode=not args.reverse_mode, **pipeline_kwargs)
     print(f"nominal_theta (degree={args.taper_degree}): {nominal_theta}")
 
     if args.verify_consistency:
-        verify_grad_consistency(nominal_theta, **pipeline_kwargs)
+        if args.parallel:
+            verify_grad_consistency_parallel(nominal_theta, **pipeline_kwargs)
+        else:
+            verify_grad_consistency(nominal_theta, **pipeline_kwargs)
     elif not args.skip_jacfwd_check:
         if args.reverse_mode:
             print("(--skip-jacfwd-check has no effect with --reverse-mode; "
@@ -580,7 +706,7 @@ def main() -> None:
             checkpoint_rows = np.loadtxt(args.checkpoint, ndmin=2).tolist()
         plot_diagnostics(
             lattice, nominal_theta, final_theta, args.n_periods, args.n_ensemble,
-            checkpoint_rows=checkpoint_rows,
+            checkpoint_rows=checkpoint_rows, dz=pipeline_kwargs["dz"],
         )
 
 
