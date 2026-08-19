@@ -1,6 +1,6 @@
 # hfofo-beamline
 
-An **application** of the [`beamline`](https://github.com/headunderheels/beamline)
+An application of the [`beamline`](https://github.com/headunderheels/beamline)
 differentiable beamline simulator: it reconstructs the frozen HFOFO snake
 cooling channel (31 periods of alternating-sign solenoids, 325 MHz pillbox RF,
 and LiH wedge absorbers) from extracted lattice data and assembles it into
